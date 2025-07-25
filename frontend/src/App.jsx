@@ -32,7 +32,7 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-100 to-pink-200 py-10 px-4">
       <main className="max-w-xl mx-auto bg-white shadow-2xl rounded-3xl p-8">
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-purple-700 mb-2">🎨 CutMatch</h1>
+           <h1 className="text-3xl font-bold text-purple-700 mb-2">FaceUp</h1>
           <p className="text-gray-500 text-sm">Scan your face. Pick your mood. Get inspired.</p>
         </div>
 
