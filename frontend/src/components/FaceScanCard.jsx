@@ -24,20 +24,18 @@ const FaceScanCard = ({ onFaceScan, isScanning }) => {
       <div className="aspect-[3/4] flex flex-col items-center justify-center p-8">
         {/* Camera view or placeholder */}
         <div className="w-48 h-64 bg-white/50 rounded-2xl mb-6 flex items-center justify-center overflow-hidden">
-          {showCamera ? (
-            <Webcam
-              audio={false}
-              ref={webcamRef}
-              screenshotFormat="image/jpeg"
-              videoConstraints={videoConstraints}
-              className="rounded-xl"
-            />
-          ) : (
-            <div className="w-32 h-32 bg-pink-200 rounded-full flex items-center justify-center">
-              <Camera className="h-12 w-12 text-pink-600" />
-            </div>
-          )}
-        </div>
+          <Webcam
+  audio={false}
+  ref={webcamRef}
+  screenshotFormat="image/jpeg"
+  videoConstraints={videoConstraints}
+  className="rounded-xl border border-red-500"
+  onUserMediaError={(err) => {
+    console.error("Webcam error:", err);
+    alert("Camera access denied or not available.");
+  }}
+/>
+
 
         <Button
           onClick={handleFaceScan}
