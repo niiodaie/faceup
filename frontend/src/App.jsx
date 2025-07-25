@@ -10,6 +10,7 @@ function App() {
   const [selectedMoods, setSelectedMoods] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('EN');
+  const [capturedImage, setCapturedImage] = useState(null); // 👈 New state
 
   const handleMoodToggle = (mood) => {
     setSelectedMoods(prev => 
@@ -21,11 +22,14 @@ function App() {
 
   const handleFaceScan = () => {
     setIsScanning(true);
-    // Simulate scanning process
     setTimeout(() => {
       setIsScanning(false);
-      // Here you would typically navigate to results or show results
     }, 3000);
+  };
+
+  const handleCaptureImage = (imageBase64) => {
+    setCapturedImage(imageBase64);
+    console.log("Image captured:", imageBase64);
   };
 
   const handleLanguageToggle = () => {
@@ -36,7 +40,6 @@ function App() {
   };
 
   const handleTryAR = () => {
-    // Navigate to AR try-on view
     console.log('Navigate to AR try-on');
   };
 
@@ -49,7 +52,6 @@ function App() {
         />
         
         <main className="px-4 pb-8 space-y-8">
-          {/* Face Scan Section */}
           <div className="text-center">
             <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-purple-600 mb-2">
               FACEUP
@@ -58,21 +60,31 @@ function App() {
             
             <FaceScanCard 
               onFaceScan={handleFaceScan}
+              onCapture={handleCaptureImage} // 👈 Passed to child
               isScanning={isScanning}
             />
+
+            {/* Show captured image */}
+            {capturedImage && (
+              <div className="mt-6">
+                <p className="text-sm text-gray-500 mb-2">Captured:</p>
+                <img 
+                  src={capturedImage} 
+                  alt="Captured face" 
+                  className="rounded shadow-md mx-auto w-32 h-auto"
+                />
+              </div>
+            )}
           </div>
 
-          {/* Mood Selector */}
           <MoodSelector 
             selectedMoods={selectedMoods}
             onMoodToggle={handleMoodToggle}
             title="What's today about?"
           />
 
-          {/* CutMatch Suggestions */}
           <CutMatchSuggestions />
 
-          {/* Action Button */}
           <ActionButton onClick={handleTryAR}>
             SWIPE, SAVE, TRY AR
           </ActionButton>
@@ -83,4 +95,3 @@ function App() {
 }
 
 export default App;
-
