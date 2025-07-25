@@ -95,6 +95,21 @@ function App() {
           </div>
         </main>
       </div>
+      
+      {/* VNX Powered by Visnec Icon */}
+      <a 
+        href="https://visnec.ai" 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        className="fixed bottom-4 right-4 z-50 group"
+        title="Powered by VNX"
+      >
+        <img 
+          src="/vnx-icon.png" 
+          alt="VNX" 
+          className="w-8 h-8 opacity-50 hover:opacity-100 transition-all duration-300 group-hover:scale-110 drop-shadow-lg" 
+        />
+      </a>
     </div>
   );
 }
