@@ -1,95 +1,95 @@
 import React, { useState } from 'react';
 import './App.css';
+import Header from './components/Header';
+import FaceScanCard from './components/FaceScanCard';
+import MoodSelector from './components/MoodSelector';
+import CutMatchSuggestions from './components/CutMatchSuggestions';
 import ActionButton from './components/ActionButton';
 
 function App() {
   const [selectedMoods, setSelectedMoods] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
-  const [capturedImage, setCapturedImage] = useState(null);
-  const [hairstyleSuggestions, setHairstyleSuggestions] = useState([]);
   const [currentLanguage, setCurrentLanguage] = useState('EN');
+  const [capturedImage, setCapturedImage] = useState(null); // 👈 New state
+
+  const handleMoodToggle = (mood) => {
+    setSelectedMoods(prev => 
+      prev.includes(mood) 
+        ? prev.filter(m => m !== mood)
+        : [...prev, mood]
+    );
+  };
 
   const handleFaceScan = () => {
     setIsScanning(true);
     setTimeout(() => {
       setIsScanning(false);
-      setCapturedImage('/example-face.jpg'); // Replace with actual image logic later
-      setHairstyleSuggestions([
-        'Bold Fade',
-        'Curly Top',
-        'Modern Bob',
-        'Taper Fade',
-        'Buzzcut Revival',
-      ]);
     }, 3000);
   };
 
+  const handleCaptureImage = (imageBase64) => {
+    setCapturedImage(imageBase64);
+    console.log("Image captured:", imageBase64);
+  };
+
+  const handleLanguageToggle = () => {
+    const languages = ['EN', 'ES', 'FR', 'AR'];
+    const currentIndex = languages.indexOf(currentLanguage);
+    const nextIndex = (currentIndex + 1) % languages.length;
+    setCurrentLanguage(languages[nextIndex]);
+  };
+
   const handleTryAR = () => {
-    alert('Try AR button clicked!');
+    console.log('Navigate to AR try-on');
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-100 to-pink-200 py-10 px-4">
-      <main className="max-w-xl mx-auto bg-white shadow-2xl rounded-3xl p-8">
-        <div className="text-center mb-6">
-           <h1 className="text-3xl font-bold text-purple-700 mb-2">FaceUp</h1>
-          <p className="text-gray-500 text-sm">Scan your face. Pick your mood. Get inspired.</p>
-        </div>
-
-        <div className="flex flex-col items-center space-y-4">
-          <button
-            onClick={handleFaceScan}
-            className="bg-purple-600 text-white py-2 px-6 rounded-lg shadow-lg hover:bg-purple-700 transition"
-          >
-            Start Face Scan
-          </button>
-        </div>
-
-        {isScanning && (
-          <div className="flex flex-col items-center my-6">
-            <span className="text-purple-600 font-semibold mb-2">🔍 Scanning your face...</span>
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600"></div>
-          </div>
-        )}
-
-        {capturedImage && (
-          <div className="mt-6 text-center">
-            <h4 className="text-md font-medium mb-2 text-gray-600">📸 Captured Image</h4>
-            <img
-              src={capturedImage}
-              alt="Captured"
-              className="w-40 h-40 object-cover rounded-xl border-4 border-purple-200 shadow-md mx-auto"
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-pink-100">
+      <div className="max-w-md mx-auto">
+        <Header 
+          onLanguageToggle={handleLanguageToggle}
+          currentLanguage={currentLanguage}
+        />
+        
+        <main className="px-4 pb-8 space-y-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-purple-600 mb-2">
+              FACEUP
+            </h1>
+            <p className="text-gray-600 mb-8">Be Seen. Be Styled. Be You.</p>
+            
+            <FaceScanCard 
+              onFaceScan={handleFaceScan}
+              onCapture={handleCaptureImage} // 👈 Passed to child
+              isScanning={isScanning}
             />
-          </div>
-        )}
 
-        {hairstyleSuggestions.length > 0 && (
-          <div className="mt-10">
-            <h3 className="text-lg font-bold text-purple-600 mb-4 text-center">
-              🎯 Top Style Suggestions
-            </h3>
-            <ul className="flex flex-wrap justify-center gap-3">
-              {hairstyleSuggestions.map((style, index) => (
-                <li
-                  key={index}
-                  className="bg-white px-5 py-2 rounded-full text-sm text-gray-800 shadow-md hover:bg-purple-50 transition-all duration-200"
-                >
-                  {style}
-                </li>
-              ))}
-            </ul>
+            {/* Show captured image */}
+            {capturedImage && (
+              <div className="mt-6">
+                <p className="text-sm text-gray-500 mb-2">Captured:</p>
+                <img 
+                  src={capturedImage} 
+                  alt="Captured face" 
+                  className="rounded shadow-md mx-auto w-32 h-auto"
+                />
+              </div>
+            )}
           </div>
-        )}
 
-        <div className="text-center mt-10">
-          <ActionButton
-            onClick={handleTryAR}
-            className="mt-4 bg-gradient-to-r from-purple-600 to-pink-500 text-white px-6 py-3 rounded-lg shadow-lg hover:scale-105 transition"
-          >
+          <MoodSelector 
+            selectedMoods={selectedMoods}
+            onMoodToggle={handleMoodToggle}
+            title="What's today about?"
+          />
+
+          <CutMatchSuggestions />
+
+          <ActionButton onClick={handleTryAR}>
             SWIPE, SAVE, TRY AR
           </ActionButton>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
