@@ -1,9 +1,5 @@
 import React, { useState } from 'react';
 import './App.css';
-import Header from './components/Header';
-import FaceScanCard from './components/FaceScanCard';
-import MoodSelector from './components/MoodSelector';
-import CutMatchSuggestions from './components/CutMatchSuggestions';
 import ActionButton from './components/ActionButton';
 
 function App() {
@@ -13,42 +9,28 @@ function App() {
   const [hairstyleSuggestions, setHairstyleSuggestions] = useState([]);
   const [currentLanguage, setCurrentLanguage] = useState('EN');
 
-  const handleMoodToggle = (mood) => {
-    setSelectedMoods((prev) =>
-      prev.includes(mood)
-        ? prev.filter((m) => m !== mood)
-        : [...prev, mood]
-    );
-  };
-
   const handleFaceScan = () => {
     setIsScanning(true);
     setTimeout(() => {
       setIsScanning(false);
-      setCapturedImage('/example-face.jpg'); // Mock image
+      setCapturedImage('/example-face.jpg'); // Replace with actual image logic later
       setHairstyleSuggestions([
         'Bold Fade',
         'Curly Top',
         'Modern Bob',
         'Taper Fade',
-        'Buzzcut Revival'
+        'Buzzcut Revival',
       ]);
     }, 3000);
   };
 
-  const handleLanguageToggle = () => {
-    const languages = ['EN', 'ES', 'FR', 'AR'];
-    const currentIndex = languages.indexOf(currentLanguage);
-    setCurrentLanguage(languages[(currentIndex + 1) % languages.length]);
-  };
-
   const handleTryAR = () => {
-    console.log('Navigating to AR view...');
+    alert('Try AR button clicked!');
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-100 to-pink-200 py-10 px-4">
-      <main className="max-w-2xl mx-auto bg-white shadow-2xl rounded-3xl p-6">
+      <main className="max-w-xl mx-auto bg-white shadow-2xl rounded-3xl p-8">
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-purple-700 mb-2">🎨 CutMatch</h1>
           <p className="text-gray-500 text-sm">Scan your face. Pick your mood. Get inspired.</p>
