@@ -52,11 +52,7 @@ const handleCaptureImage = (imageBase64) => {
     }, 3000);
   };
 
-  const handleCaptureImage = (imageBase64) => {
-    setCapturedImage(imageBase64);
-    console.log("Image captured:", imageBase64);
-  };
-
+  
   const handleLanguageToggle = () => {
     const languages = ['EN', 'ES', 'FR', 'AR'];
     const currentIndex = languages.indexOf(currentLanguage);
