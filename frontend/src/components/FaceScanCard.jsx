@@ -10,7 +10,7 @@ const videoConstraints = {
   facingMode: 'user',
 };
 
-const FaceScanCard = ({ onFaceScan, isScanning }) => {
+const FaceScanCard = ({ onFaceScan, isScanning, onCapture }) => {
   const webcamRef = useRef(null);
   const [showCamera, setShowCamera] = useState(false);
   const [capturedImage, setCapturedImage] = useState(null);
@@ -21,10 +21,14 @@ const FaceScanCard = ({ onFaceScan, isScanning }) => {
   };
 
   const captureImage = () => {
-    const imageSrc = webcamRef.current.getScreenshot();
-    setCapturedImage(imageSrc);
-    setShowCamera(false);
-  };
+  const imageSrc = webcamRef.current.getScreenshot();
+  setCapturedImage(imageSrc);
+  setShowCamera(false);
+  if (onCapture) {
+    onCapture(imageSrc); // send image base64 to parent
+  }
+};
+
 
   return (
     <Card className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-pink-100 to-pink-50 border-0 shadow-lg">
