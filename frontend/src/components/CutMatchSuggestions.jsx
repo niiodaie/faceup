@@ -1,30 +1,41 @@
 import React from 'react';
-import { Card } from './ui/card';
+import { Button } from './ui/button';
 
 const CutMatchSuggestions = () => {
   const suggestions = [
-    '#SoftLife',
-    '#DateNight', 
-    '#FestivalQueen',
-    '#BoldBrowEnergy'
+    'Buzzcut Revival',
+    'Taper Fade',
+    'Soft Glam',
+    'Bold Brow Energy',
+    'Festival Queen',
+    'Date Night Glow'
   ];
 
   return (
     <div className="w-full">
-      <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
-        CutMatch Suggestions
+      <h2 className="text-2xl font-bold text-center mb-6 gradient-text">
+        Top Style Suggestions
       </h2>
       
-      <div className="flex flex-wrap justify-center gap-3">
+      <div className="grid grid-cols-2 gap-3">
         {suggestions.map((suggestion, index) => (
-          <Card 
+          <Button
             key={index}
-            className="px-4 py-2 bg-gradient-to-r from-purple-100 to-pink-100 border-0 rounded-full shadow-sm"
+            variant="outline"
+            className="
+              bg-gradient-to-r from-purple-50 to-pink-50 
+              border-2 border-purple-200 
+              text-purple-700 font-semibold 
+              rounded-full py-3 px-4 
+              shadow-md hover:shadow-lg 
+              hover:from-purple-100 hover:to-pink-100 
+              hover:border-purple-300 
+              transition-all duration-300 
+              hover-lift
+            "
           >
-            <span className="text-purple-700 font-medium text-sm">
-              {suggestion}
-            </span>
-          </Card>
+            {suggestion}
+          </Button>
         ))}
       </div>
     </div>

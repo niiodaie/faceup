@@ -13,21 +13,22 @@ const MoodSelector = ({ selectedMoods, onMoodToggle, title }) => {
 
   return (
     <div className="w-full">
-      <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
+      <h2 className="text-2xl font-bold text-center mb-6 gradient-text">
         {title}
       </h2>
       
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {moods.map((mood) => (
           <Button
             key={mood}
             variant={selectedMoods.includes(mood) ? "default" : "outline"}
             onClick={() => onMoodToggle(mood)}
             className={`
-              rounded-full py-3 px-4 font-medium transition-all duration-200
+              rounded-full py-3 px-3 font-semibold text-sm
+              transition-all duration-300 hover-lift
               ${selectedMoods.includes(mood) 
-                ? 'bg-pink-500 text-white shadow-md' 
-                : 'bg-white text-gray-700 border-gray-200 hover:border-pink-300 hover:text-pink-600'
+                ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-lg border-2 border-white/20' 
+                : 'bg-white/80 text-gray-700 border-2 border-gray-200 hover:border-purple-300 hover:text-purple-600 hover:bg-purple-50'
               }
             `}
           >
