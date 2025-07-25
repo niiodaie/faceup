@@ -24,12 +24,14 @@ const FaceScanCard = ({ onFaceScan, isScanning }) => {
   return (
     <Card className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-pink-100 to-pink-50 border-0 shadow-lg">
       <div className="aspect-[3/4] flex flex-col items-center justify-center p-6 space-y-4">
-        <div className="w-48 h-64 rounded-2xl bg-white/50 overflow-hidden flex items-center justify-center">
+
+        <div className="w-48 h-64 bg-white/50 rounded-2xl mb-6 flex items-center justify-center">
           {isScanning ? (
             <video
               ref={videoRef}
               autoPlay
               playsInline
+              muted
               className="w-full h-full object-cover rounded-2xl"
             />
           ) : (
@@ -47,6 +49,7 @@ const FaceScanCard = ({ onFaceScan, isScanning }) => {
           <Camera className="h-5 w-5 mr-2" />
           {isScanning ? 'Scanning...' : 'Face Scan'}
         </Button>
+
       </div>
     </Card>
   );
