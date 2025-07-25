@@ -11,6 +11,7 @@ function App() {
   const [isScanning, setIsScanning] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('EN');
   const [capturedImage, setCapturedImage] = useState(null); // 👈 New state
+  const [hairstyleSuggestions, setHairstyleSuggestions] = useState([]); // 👈 new
 
   const handleMoodToggle = (mood) => {
     setSelectedMoods(prev => 
@@ -19,6 +20,28 @@ function App() {
         : [...prev, mood]
     );
   };
+
+  const generateSuggestions = (imageBase64, moods) => {
+  // Replace with real AI call later — for now simulate
+  const baseSuggestions = ['Curly Bob', 'Sleek Ponytail', 'Textured Fade', 'Natural Twist'];
+  const moodBoost = {
+    Brunch: 'Messy Bun',
+    Interview: 'Low Bun',
+    Vacation: 'Beach Waves',
+    'Breakup Glow-Up': 'Bold Pixie',
+  };
+
+  const results = moods.map(mood => moodBoost[mood]).filter(Boolean);
+  const combined = [...new Set([...results, ...baseSuggestions.slice(0, 2)])];
+  setHairstyleSuggestions(combined);
+};
+
+const handleCaptureImage = (imageBase64) => {
+  setCapturedImage(imageBase64);
+  generateSuggestions(imageBase64, selectedMoods); // 👈 generate suggestions
+};
+
+
 
   const handleFaceScan = () => {
     setIsScanning(true);
@@ -84,6 +107,19 @@ function App() {
           />
 
           <CutMatchSuggestions />
+
+          {hairstyleSuggestions.length > 0 && (
+  <div className="mt-6 text-center">
+    <h3 className="text-lg font-semibold text-purple-600 mb-2">Top Style Suggestions</h3>
+    <ul className="flex flex-wrap justify-center gap-2">
+      {hairstyleSuggestions.map((style, index) => (
+        <li key={index} className="bg-white text-sm text-gray-700 rounded-full px-4 py-2 shadow-sm">
+          {style}
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
 
           <ActionButton onClick={handleTryAR}>
             SWIPE, SAVE, TRY AR
