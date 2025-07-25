@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Camera } from 'lucide-react';
@@ -13,7 +13,7 @@ const FaceScanCard = ({ onFaceScan, isScanning }) => {
             <Camera className="h-12 w-12 text-pink-600" />
           </div>
         </div>
-        
+
         <Button
           onClick={onFaceScan}
           disabled={isScanning}
@@ -27,5 +27,40 @@ const FaceScanCard = ({ onFaceScan, isScanning }) => {
   );
 };
 
-export default FaceScanCard;
+const Home = () => {
+  const [isScanning, setIsScanning] = useState(false);
 
+  const handleFaceScan = async () => {
+    try {
+      setIsScanning(true);
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+
+      const video = document.getElementById('face-video');
+      if (video) {
+        video.srcObject = stream;
+        video.play();
+      } else {
+        console.warn('Video element not found.');
+      }
+    } catch (error) {
+      console.error('Error accessing webcam:', error);
+    } finally {
+      setIsScanning(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-pink-50 p-4">
+      <FaceScanCard onFaceScan={handleFaceScan} isScanning={isScanning} />
+
+      <video
+        id="face-video"
+        autoPlay
+        playsInline
+        className="mt-6 rounded-xl border border-pink-300 shadow-lg w-64 h-64 bg-black"
+      />
+    </div>
+  );
+};
+
+export default Home;
