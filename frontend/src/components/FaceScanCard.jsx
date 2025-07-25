@@ -13,30 +13,37 @@ const videoConstraints = {
 const FaceScanCard = ({ onFaceScan, isScanning }) => {
   const webcamRef = useRef(null);
   const [showCamera, setShowCamera] = useState(false);
-  const [permissionDenied, setPermissionDenied] = useState(false);
+  const [capturedImage, setCapturedImage] = useState(null);
 
   const handleFaceScan = () => {
     setShowCamera(true);
-    setPermissionDenied(false);
+    setCapturedImage(null); // reset any previous image
     if (onFaceScan) onFaceScan();
+  };
+
+  const capture = () => {
+    const imageSrc = webcamRef.current.getScreenshot();
+    setCapturedImage(imageSrc);
   };
 
   return (
     <Card className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-pink-100 to-pink-50 border-0 shadow-lg">
       <div className="aspect-[3/4] flex flex-col items-center justify-center p-8">
-
+        {/* Camera view / captured image / placeholder */}
         <div className="w-48 h-64 bg-white/50 rounded-2xl mb-6 flex items-center justify-center overflow-hidden">
-          {showCamera ? (
+          {capturedImage ? (
+            <img
+              src={capturedImage}
+              alt="Captured face"
+              className="rounded-xl w-full h-full object-cover"
+            />
+          ) : showCamera ? (
             <Webcam
               audio={false}
               ref={webcamRef}
               screenshotFormat="image/jpeg"
               videoConstraints={videoConstraints}
               className="rounded-xl"
-              onUserMediaError={(e) => {
-                console.error('Camera error:', e);
-                setPermissionDenied(true);
-              }}
             />
           ) : (
             <div className="w-32 h-32 bg-pink-200 rounded-full flex items-center justify-center">
@@ -45,10 +52,7 @@ const FaceScanCard = ({ onFaceScan, isScanning }) => {
           )}
         </div>
 
-        {permissionDenied && (
-          <p className="text-red-500 text-sm mb-2">Camera access denied. Please allow access and try again.</p>
-        )}
-
+        {/* Main scan button */}
         <Button
           onClick={handleFaceScan}
           disabled={isScanning}
@@ -57,6 +61,26 @@ const FaceScanCard = ({ onFaceScan, isScanning }) => {
           <Camera className="h-5 w-5 mr-2" />
           {isScanning ? 'Scanning...' : showCamera ? 'Rescan' : 'Face Scan'}
         </Button>
+
+        {/* Capture & Retake */}
+        {showCamera && !capturedImage && (
+          <Button
+            onClick={capture}
+            className="mt-4 bg-pink-600 text-white rounded-full px-6 py-2 shadow-md"
+          >
+            📸 Capture
+          </Button>
+        )}
+
+        {capturedImage && (
+          <Button
+            onClick={() => setCapturedImage(null)}
+            variant="ghost"
+            className="mt-2 text-sm text-pink-600 underline hover:text-pink-800 bg-transparent"
+          >
+            Retake
+          </Button>
+        )}
       </div>
     </Card>
   );
