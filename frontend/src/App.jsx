@@ -39,6 +39,7 @@ function App() {
 const handleCaptureImage = (imageBase64) => {
   setCapturedImage(imageBase64);
   generateSuggestions(imageBase64, selectedMoods); // 👈 generate suggestions
+  console.log("📸 Image captured:", imageBase64); // ✅ log here
 };
 
 
