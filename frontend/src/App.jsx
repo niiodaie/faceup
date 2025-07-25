@@ -1,3 +1,46 @@
+
+import React, { useState } from 'react';
+import './App.css';
+import Header from './components/Header';
+import FaceScanCard from './components/FaceScanCard';
+import MoodSelector from './components/MoodSelector';
+import CutMatchSuggestions from './components/CutMatchSuggestions';
+import ActionButton from './components/ActionButton';
+
+function App() {
+  const [selectedMoods, setSelectedMoods] = useState([]);
+  const [isScanning, setIsScanning] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState('EN');
+
+  const handleMoodToggle = (mood) => {
+    setSelectedMoods(prev => 
+      prev.includes(mood) 
+        ? prev.filter(m => m !== mood)
+        : [...prev, mood]
+    );
+  };
+
+  const handleFaceScan = () => {
+    setIsScanning(true);
+    // Simulate scanning process
+    setTimeout(() => {
+      setIsScanning(false);
+      // Here you would typically navigate to results or show results
+    }, 3000);
+  };
+
+  const handleLanguageToggle = () => {
+    const languages = ['EN', 'ES', 'FR', 'AR'];
+    const currentIndex = languages.indexOf(currentLanguage);
+    const nextIndex = (currentIndex + 1) % languages.length;
+    setCurrentLanguage(languages[nextIndex]);
+  };
+
+  const handleTryAR = () => {
+    // Navigate to AR try-on view
+    console.log('Navigate to AR try-on');
+  };
+
 return (
   <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-100 to-pink-200 py-10 px-4">
     <main className="max-w-2xl mx-auto bg-white shadow-2xl rounded-3xl p-6">
