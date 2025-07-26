@@ -2,7 +2,8 @@ import { Dialog } from '@headlessui/react';
 import { useState } from 'react';
 import { FcGoogle } from 'react-icons/fc';
 import { FaFacebook, FaApple } from 'react-icons/fa';
-import { supabase } from "../../supabaseClient";
+import { supabase } from "../../../supabaseClient";
+
 
 export default function AuthModal({ isOpen, onClose }) {
   const [isSignup, setIsSignup] = useState(true);
