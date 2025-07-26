@@ -9,7 +9,7 @@ import Auth from './components/Auth'; // Import Auth component
 import GuestDemo from './components/GuestDemo';
 import UpgradePrompt from './components/UpgradePrompt';
 import AffiliateLinks from './components/AffiliateLinks';
-import { supabase } from './supabaseClient';
+import { supabase } from './utils/supabaseClient'; // ✅ correct
 import { useUserRole, hasAccess, USER_ROLES } from './hooks/useUserRole';
 
 function App() {
