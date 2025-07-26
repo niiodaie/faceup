@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Globe, LogOut } from 'lucide-react';
 import logoTagline from '../assets/faceup-logo-tagline.png';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../utils/supabaseClient'; // depending on file location
 import AuthModal from './AuthModal'; // make sure this path is correct
 
 const Header = ({ onLanguageToggle, currentLanguage, session, user }) => {
