@@ -5,12 +5,15 @@ import FaceScanCard from './components/FaceScanCard';
 import MoodSelector from './components/MoodSelector';
 import CutMatchSuggestions from './components/CutMatchSuggestions';
 import ActionButton from './components/ActionButton';
+import AuthModal from './components/AuthModal';
 
 function App() {
   const [selectedMoods, setSelectedMoods] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('EN');
   const [capturedImage, setCapturedImage] = useState(null); // 👈 New state
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+
 
   const handleMoodToggle = (mood) => {
     setSelectedMoods(prev => 
