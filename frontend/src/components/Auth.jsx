@@ -63,6 +63,9 @@ const Auth = ({ onGuestDemo }) => {
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-500"
               required
             />
+            <p className="text-sm text-right text-purple-600 hover:underline mt-2">
+  <a href="/reset-password">Forgot your password?</a>
+</p>
             <Button
               type="submit"
               className="w-full py-3 rounded-lg font-bold text-lg bg-gradient-to-r from-pink-500 to-purple-500 text-white hover:from-pink-600 hover:to-purple-600 transition-all duration-300 shadow-md"
