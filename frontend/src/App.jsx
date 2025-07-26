@@ -1,5 +1,3 @@
-📄 File: App.jsx (Enhanced Auth + Role Handling + Logout + Language Persistence)
-
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import Header from './components/Header';
