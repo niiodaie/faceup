@@ -30,8 +30,8 @@ const Auth = ({ onGuestDemo }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100 p-4">
       <div className="text-center mb-8">
-        <h1 className="text-5xl font-bold gradient-text mb-3">
-          FACEUP
+        <h1 className="text-5xl font-extrabold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-pink-400 tracking-wide">
+  Face<span className="italic font-light">Up</span>
         </h1>
         <p className="text-gray-600 text-lg font-medium">Be Seen. Be Styled. Be You.</p>
       </div>
