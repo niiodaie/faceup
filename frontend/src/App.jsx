@@ -1,3 +1,5 @@
+📄 File: App.jsx (Enhanced Auth + Role Handling + Logout + Language Persistence)
+
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import Header from './components/Header';
@@ -5,12 +7,12 @@ import FaceScanCard from './components/FaceScanCard';
 import MoodSelector from './components/MoodSelector';
 import CutMatchSuggestions from './components/CutMatchSuggestions';
 import ActionButton from './components/ActionButton';
-import Auth from './components/Auth'; // Import Auth component
+import Auth from './components/Auth';
 import GuestDemo from './components/GuestDemo';
 import UpgradePrompt from './components/UpgradePrompt';
 import AffiliateLinks from './components/AffiliateLinks';
-import { supabase } from './utils/supabaseClient'; // ✅ correct
-import { useUserRole, hasAccess, USER_ROLES } from './hooks/useUserRole';
+import { supabase } from './utils/supabaseClient';
+import { useUserRole, hasAccess } from './hooks/useUserRole';
 
 function App() {
   const [selectedMoods, setSelectedMoods] = useState([]);
@@ -20,12 +22,14 @@ function App() {
   const [session, setSession] = useState(null);
   const [user, setUser] = useState(null);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(null);
-  const [showAuth, setShowAuth] = useState(false);
   const [guestMode, setGuestMode] = useState(false);
-  
+
   const { userRole, loading } = useUserRole(user);
 
   useEffect(() => {
+    const storedLang = localStorage.getItem('language');
+    if (storedLang) setCurrentLanguage(storedLang);
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user || null);
@@ -39,11 +43,16 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setSession(null);
+    setUser(null);
+    setGuestMode(false);
+  };
+
   const handleMoodToggle = (mood) => {
-    setSelectedMoods(prev => 
-      prev.includes(mood) 
-        ? prev.filter(m => m !== mood)
-        : [...prev, mood]
+    setSelectedMoods(prev =>
+      prev.includes(mood) ? prev.filter(m => m !== mood) : [...prev, mood]
     );
   };
 
@@ -61,9 +70,10 @@ function App() {
 
   const handleLanguageToggle = () => {
     const languages = ['EN', 'ES', 'FR', 'AR'];
-    const currentIndex = languages.indexOf(currentLanguage);
-    const nextIndex = (currentIndex + 1) % languages.length;
-    setCurrentLanguage(languages[nextIndex]);
+    const nextIndex = (languages.indexOf(currentLanguage) + 1) % languages.length;
+    const nextLang = languages[nextIndex];
+    setCurrentLanguage(nextLang);
+    localStorage.setItem('language', nextLang);
   };
 
   const handleTryAR = () => {
@@ -75,7 +85,6 @@ function App() {
   };
 
   const handleUpgrade = () => {
-    // For now, just show alert - Stripe integration will come in Phase 3
     alert('Upgrade functionality will be implemented in Phase 3 with Stripe integration');
   };
 
@@ -83,17 +92,10 @@ function App() {
     setGuestMode(true);
   };
 
-  const handleShowAuth = () => {
-    setShowAuth(true);
-    setGuestMode(false);
-  };
-
-  // Show guest demo if no session and guest mode is enabled
   if (!session && guestMode) {
-    return <GuestDemo onSignUp={handleShowAuth} />;
+    return <GuestDemo onSignUp={() => setGuestMode(false)} />;
   }
 
-  // Show auth if no session and not in guest mode
   if (!session) {
     return <Auth onGuestDemo={handleGuestDemo} />;
   }
@@ -112,20 +114,19 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100">
       <div className="max-w-md mx-auto">
-        <Header 
+        <Header
           onLanguageToggle={handleLanguageToggle}
           currentLanguage={currentLanguage}
           session={session}
           user={user}
           userRole={userRole}
+          onLogout={handleLogout}
         />
-        
+
         <main className="px-4 pb-8">
           <div className="main-card-wrapper p-6 mx-2 mb-8">
             <div className="text-center mb-8">
-              <h1 className="text-5xl font-bold gradient-text mb-3">
-                FACEUP
-              </h1>
+              <h1 className="text-5xl font-bold gradient-text mb-3">FACEUP</h1>
               <p className="text-gray-600 text-lg font-medium">Be Seen. Be Styled. Be You.</p>
               {userRole && (
                 <div className="mt-2">
@@ -139,7 +140,7 @@ function App() {
                 </div>
               )}
             </div>
-            
+
             <div className="space-y-8">
               <FaceScanCard 
                 onFaceScan={handleFaceScan}
@@ -149,13 +150,12 @@ function App() {
                 hasAccess={hasAccess}
               />
 
-              {/* Show captured image with Polaroid effect */}
               {capturedImage && (
                 <div className="flex justify-center">
                   <div className="polaroid-frame">
                     <img 
-                      src={capturedImage} 
-                      alt="Captured face" 
+                      src={capturedImage}
+                      alt="Captured face"
                       className="w-32 h-40 object-cover rounded"
                     />
                   </div>
@@ -169,8 +169,8 @@ function App() {
               />
 
               <CutMatchSuggestions 
-                userRole={userRole} 
-                hasAccess={hasAccess} 
+                userRole={userRole}
+                hasAccess={hasAccess}
                 selectedMoods={selectedMoods}
               />
 
@@ -183,8 +183,7 @@ function App() {
           </div>
         </main>
       </div>
-      
-      {/* Upgrade Prompt Modal */}
+
       {showUpgradePrompt && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="relative">
@@ -202,19 +201,18 @@ function App() {
           </div>
         </div>
       )}
-      
-      {/* VNX Powered by Visnec Icon */}
-      <a 
-        href="https://visnec.ai" 
-        target="_blank" 
-        rel="noopener noreferrer" 
+
+      <a
+        href="https://visnec.ai"
+        target="_blank"
+        rel="noopener noreferrer"
         className="fixed bottom-4 right-4 z-50 group"
         title="Powered by VNX"
       >
-        <img 
-          src="/vnx-icon.png" 
-          alt="VNX" 
-          className="w-8 h-8 opacity-50 hover:opacity-100 transition-all duration-300 group-hover:scale-110 drop-shadow-lg" 
+        <img
+          src="/vnx-icon.png"
+          alt="VNX"
+          className="w-8 h-8 opacity-50 hover:opacity-100 transition-all duration-300 group-hover:scale-110 drop-shadow-lg"
         />
       </a>
     </div>
