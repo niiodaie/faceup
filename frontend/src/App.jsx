@@ -94,6 +94,16 @@ function App() {
               <ActionButton onClick={handleTryAR}>
                 SWIPE, SAVE, TRY AR
               </ActionButton>
+
+              <button
+  onClick={() => setIsAuthOpen(true)}
+  className="fixed bottom-4 right-4 bg-purple-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-purple-700 transition z-50"
+>
+  Login / Sign Up
+</button>
+
+
+              
             </div>
           </div>
         </main>
