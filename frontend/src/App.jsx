@@ -1,19 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import Header from './components/Header';
 import FaceScanCard from './components/FaceScanCard';
 import MoodSelector from './components/MoodSelector';
 import CutMatchSuggestions from './components/CutMatchSuggestions';
 import ActionButton from './components/ActionButton';
-import AuthModal from './components/AuthModal';
+import Auth from './components/Auth'; // Import Auth component
+import GuestDemo from './components/GuestDemo';
+import UpgradePrompt from './components/UpgradePrompt';
+import AffiliateLinks from './components/AffiliateLinks';
+import { supabase } from './supabaseClient';
+import { useUserRole, hasAccess, USER_ROLES } from './hooks/useUserRole';
 
 function App() {
   const [selectedMoods, setSelectedMoods] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('EN');
-  const [capturedImage, setCapturedImage] = useState(null); // 👈 New state
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [capturedImage, setCapturedImage] = useState(null);
+  const [session, setSession] = useState(null);
+  const [user, setUser] = useState(null);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(null);
+  const [showAuth, setShowAuth] = useState(false);
+  const [guestMode, setGuestMode] = useState(false);
+  
+  const { userRole, loading } = useUserRole(user);
 
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user || null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleMoodToggle = (mood) => {
     setSelectedMoods(prev => 
@@ -43,8 +67,47 @@ function App() {
   };
 
   const handleTryAR = () => {
+    if (!hasAccess(userRole, 'ar_tryOn')) {
+      setShowUpgradePrompt('ar_tryOn');
+      return;
+    }
     console.log('Navigate to AR try-on');
   };
+
+  const handleUpgrade = () => {
+    // For now, just show alert - Stripe integration will come in Phase 3
+    alert('Upgrade functionality will be implemented in Phase 3 with Stripe integration');
+  };
+
+  const handleGuestDemo = () => {
+    setGuestMode(true);
+  };
+
+  const handleShowAuth = () => {
+    setShowAuth(true);
+    setGuestMode(false);
+  };
+
+  // Show guest demo if no session and guest mode is enabled
+  if (!session && guestMode) {
+    return <GuestDemo onSignUp={handleShowAuth} />;
+  }
+
+  // Show auth if no session and not in guest mode
+  if (!session) {
+    return <Auth onGuestDemo={handleGuestDemo} />;
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100">
@@ -52,6 +115,9 @@ function App() {
         <Header 
           onLanguageToggle={handleLanguageToggle}
           currentLanguage={currentLanguage}
+          session={session}
+          user={user}
+          userRole={userRole}
         />
         
         <main className="px-4 pb-8">
@@ -61,6 +127,17 @@ function App() {
                 FACEUP
               </h1>
               <p className="text-gray-600 text-lg font-medium">Be Seen. Be Styled. Be You.</p>
+              {userRole && (
+                <div className="mt-2">
+                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                    userRole === 'pro' ? 'bg-purple-100 text-purple-800' :
+                    userRole === 'free' ? 'bg-blue-100 text-blue-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {userRole.toUpperCase()} USER
+                  </span>
+                </div>
+              )}
             </div>
             
             <div className="space-y-8">
@@ -68,6 +145,8 @@ function App() {
                 onFaceScan={handleFaceScan}
                 onCapture={handleCaptureImage}
                 isScanning={isScanning}
+                userRole={userRole}
+                hasAccess={hasAccess}
               />
 
               {/* Show captured image with Polaroid effect */}
@@ -89,26 +168,40 @@ function App() {
                 title="What's today about?"
               />
 
-              <CutMatchSuggestions />
+              <CutMatchSuggestions 
+                userRole={userRole} 
+                hasAccess={hasAccess} 
+                selectedMoods={selectedMoods}
+              />
 
               <ActionButton onClick={handleTryAR}>
                 SWIPE, SAVE, TRY AR
               </ActionButton>
 
-              <button
-  onClick={() => setIsAuthOpen(true)}
-  className="fixed bottom-4 right-4 bg-purple-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-purple-700 transition z-50"
->
-  Login / Sign Up
-</button>
-
-
-              
+              <AffiliateLinks userRole={userRole} />
             </div>
           </div>
-          <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
         </main>
       </div>
+      
+      {/* Upgrade Prompt Modal */}
+      {showUpgradePrompt && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="relative">
+            <button
+              onClick={() => setShowUpgradePrompt(null)}
+              className="absolute -top-2 -right-2 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg z-10"
+            >
+              ×
+            </button>
+            <UpgradePrompt
+              feature={showUpgradePrompt}
+              userRole={userRole}
+              onUpgrade={handleUpgrade}
+            />
+          </div>
+        </div>
+      )}
       
       {/* VNX Powered by Visnec Icon */}
       <a 
