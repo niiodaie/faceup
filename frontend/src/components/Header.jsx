@@ -1,67 +1,50 @@
 import React, { useState } from 'react';
+import { supabase } from '../utils/supabaseClient';
+import AuthModal from './AuthModal'; // ✅ Ensure path is correct
 import { Button } from './ui/button';
-import { Globe, LogOut } from 'lucide-react';
-import logoTagline from '../assets/faceup-logo-tagline.png';
-import { supabase } from '../utils/supabaseClient'; // depending on file location
-import AuthModal from './AuthModal'; // make sure this path is correct
 
 const Header = ({ onLanguageToggle, currentLanguage, session, user }) => {
-  const [authOpen, setAuthOpen] = useState(false); // modal open state
+  const [authOpen, setAuthOpen] = useState(false); // modal toggle
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
-    if (error) alert(error.message);
+    if (error) {
+      alert(error.message);
+    } else {
+      window.location.reload(); // force logout refresh or redirect if needed
+    }
   };
 
   return (
-    <header className="w-full px-4 py-6 flex justify-between items-center">
-      <div className="flex items-center">
-        <img 
-          src={logoTagline} 
-          alt="FaceUp - Be Seen. Be Styled. Be You." 
-          className="h-12 w-auto"
-        />
-      </div>
+    <header className="w-full flex items-center justify-between px-6 py-4 shadow-md bg-white/80 backdrop-blur-sm z-50">
+      <h1 className="text-xl font-bold tracking-wide text-purple-700">FACEUP</h1>
 
-      <div className="flex items-center gap-4">
-        {user && (
-          <span className="text-sm text-gray-600 hidden sm:inline-block">{user.email}</span>
-        )}
-
+      <div className="flex items-center space-x-4">
         <Button
-          variant="ghost"
-          size="sm"
+          variant="outline"
           onClick={onLanguageToggle}
-          className="flex items-center gap-2 text-muted-foreground hover:text-primary"
         >
-          <Globe className="h-4 w-4" />
-          <span className="text-sm font-medium">{currentLanguage}</span>
+          {currentLanguage === 'en' ? 'FR' : 'EN'}
         </Button>
 
-        {!session ? (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setAuthOpen(true)}
-            className="text-sm font-medium"
-          >
-            Login / Sign Up
-          </Button>
+        {session ? (
+          <>
+            <span className="text-sm text-gray-600">Hi, {user?.email || 'User'}</span>
+            <Button onClick={handleLogout} className="bg-red-500 hover:bg-red-600 text-white">
+              Log Out
+            </Button>
+          </>
         ) : (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLogout}
-            className="flex items-center gap-2 text-muted-foreground hover:text-primary"
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="text-sm font-medium">Logout</span>
+          <Button onClick={() => setAuthOpen(true)} className="bg-purple-600 hover:bg-purple-700 text-white">
+            Sign In
           </Button>
         )}
       </div>
 
-      {/* Inject the Modal */}
-      <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
+      {/* 🔐 Auth Modal */}
+      {authOpen && (
+        <AuthModal onClose={() => setAuthOpen(false)} />
+      )}
     </header>
   );
 };
