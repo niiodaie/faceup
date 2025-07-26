@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Globe, LogOut } from 'lucide-react';
 import logoTagline from '../assets/faceup-logo-tagline.png';
 import { supabase } from '../supabaseClient';
+import AuthModal from './AuthModal'; // make sure this path is correct
 
 const Header = ({ onLanguageToggle, currentLanguage, session, user }) => {
+  const [authOpen, setAuthOpen] = useState(false); // modal open state
+
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) alert(error.message);
@@ -19,11 +22,12 @@ const Header = ({ onLanguageToggle, currentLanguage, session, user }) => {
           className="h-12 w-auto"
         />
       </div>
-      
+
       <div className="flex items-center gap-4">
         {user && (
           <span className="text-sm text-gray-600 hidden sm:inline-block">{user.email}</span>
         )}
+
         <Button
           variant="ghost"
           size="sm"
@@ -33,7 +37,17 @@ const Header = ({ onLanguageToggle, currentLanguage, session, user }) => {
           <Globe className="h-4 w-4" />
           <span className="text-sm font-medium">{currentLanguage}</span>
         </Button>
-        {session && (
+
+        {!session ? (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setAuthOpen(true)}
+            className="text-sm font-medium"
+          >
+            Login / Sign Up
+          </Button>
+        ) : (
           <Button
             variant="ghost"
             size="sm"
@@ -45,9 +59,11 @@ const Header = ({ onLanguageToggle, currentLanguage, session, user }) => {
           </Button>
         )}
       </div>
+
+      {/* Inject the Modal */}
+      <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
     </header>
   );
 };
 
 export default Header;
-
