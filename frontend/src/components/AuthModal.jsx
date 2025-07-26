@@ -2,9 +2,32 @@ import { Dialog } from '@headlessui/react';
 import { useState } from 'react';
 import { FcGoogle } from 'react-icons/fc';
 import { FaFacebook, FaApple } from 'react-icons/fa';
+import supabase from '../utils/supabaseClient'; // adjust path as needed
 
 export default function AuthModal({ isOpen, onClose }) {
   const [isSignup, setIsSignup] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    const { data, error } = isSignup
+      ? await supabase.auth.signUp({ email, password })
+      : await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      setError(error.message);
+    } else {
+      onClose(); // close modal on success
+    }
+
+    setLoading(false);
+  };
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="fixed z-50 inset-0 flex items-center justify-center">
@@ -13,23 +36,30 @@ export default function AuthModal({ isOpen, onClose }) {
           {isSignup ? 'Create Your Account' : 'Welcome Back'}
         </Dialog.Title>
 
-        <form className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="Email address"
-            className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            required
+            className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-purple-500"
           />
           <input
             type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
-            className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            required
+            className="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-purple-500"
           />
-
+          {error && <p className="text-red-600 text-sm">{error}</p>}
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-gradient-to-r from-purple-600 to-pink-500 text-white py-2 rounded-lg hover:scale-105 transition"
           >
-            {isSignup ? 'Sign Up' : 'Sign In'}
+            {loading ? 'Loading...' : isSignup ? 'Sign Up' : 'Sign In'}
           </button>
         </form>
 
@@ -40,13 +70,22 @@ export default function AuthModal({ isOpen, onClose }) {
         </div>
 
         <div className="flex justify-between gap-3">
-          <button className="flex-1 bg-gray-100 rounded-md py-2 flex items-center justify-center gap-2 hover:bg-gray-200">
+          <button
+            onClick={() => supabase.auth.signInWithOAuth({ provider: 'google' })}
+            className="flex-1 bg-gray-100 rounded-md py-2 flex items-center justify-center gap-2 hover:bg-gray-200"
+          >
             <FcGoogle size={20} /> Google
           </button>
-          <button className="flex-1 bg-gray-100 rounded-md py-2 flex items-center justify-center gap-2 hover:bg-gray-200">
+          <button
+            onClick={() => supabase.auth.signInWithOAuth({ provider: 'facebook' })}
+            className="flex-1 bg-gray-100 rounded-md py-2 flex items-center justify-center gap-2 hover:bg-gray-200"
+          >
             <FaFacebook size={20} className="text-blue-600" /> Facebook
           </button>
-          <button className="flex-1 bg-gray-100 rounded-md py-2 flex items-center justify-center gap-2 hover:bg-gray-200">
+          <button
+            onClick={() => supabase.auth.signInWithOAuth({ provider: 'apple' })}
+            className="flex-1 bg-gray-100 rounded-md py-2 flex items-center justify-center gap-2 hover:bg-gray-200"
+          >
             <FaApple size={20} className="text-black" /> Apple
           </button>
         </div>
