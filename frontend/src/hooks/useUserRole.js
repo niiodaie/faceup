@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../utils/supabaseClient'; // depending on file location
 
 export const useUserRole = (user) => {
   const [userRole, setUserRole] = useState('guest');
