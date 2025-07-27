@@ -146,10 +146,10 @@ function App() {
     />
 
     <Route path="*" element={<NotFound />} />
-  </Routes>
-</Router>
-
-);
+    </Routes>
+  </Router>
+); // ✅ <-- This closes the return
+}
 
           element={session ? (
             guestMode ? (
