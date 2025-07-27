@@ -116,8 +116,8 @@ function App() {
       <Route path="/signup" element={<SignUp />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/guest" element={<GuestDemo onSignUp={() => setGuestMode(false)} />} />
-      <Route
-        <Route
+
+<Route
   path="/app"
   element={
     session ? (
