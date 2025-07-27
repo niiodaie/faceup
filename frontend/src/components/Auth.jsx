@@ -13,25 +13,27 @@ const Auth = ({ onGuestDemo }) => {
   const [isSignUp, setIsSignUp] = useState(false);
 
   useEffect(() => {
+  const timer = setTimeout(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         console.log('Session restored:', session.user);
-        // 🔁 Redirect to dashboard or homepage
-      window.location.href = '/'; // or any other valid route
-
+        window.location.href = '/';
       }
     });
+  }, 300); // wait 300ms
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        console.log('Auth state changed:', session.user);
-      }
-    });
+  const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    if (session) {
+      console.log('Auth state changed:', session.user);
+    }
+  });
 
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-  }, []);
+  return () => {
+    clearTimeout(timer);
+    listener.subscription.unsubscribe();
+  };
+}, []);
+
 
   const handleLogin = async (e) => {
   e.preventDefault();
