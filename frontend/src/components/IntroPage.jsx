@@ -1,7 +1,8 @@
 // src/pages/IntroPage.jsx
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button'; // adjust path as needed
+import { Button } from '@/components/ui/button'; // Adjust if path differs
 import { Eye } from 'lucide-react';
 
 const IntroPage = ({ onGuestDemo }) => {
@@ -12,6 +13,7 @@ const IntroPage = ({ onGuestDemo }) => {
       <h1 className="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-700 mb-4">
         Welcome to FaceUp
       </h1>
+
       <p className="text-xl md:text-2xl text-gray-700 mb-10">
         Be Seen. Be Styled. Be You.
       </p>
