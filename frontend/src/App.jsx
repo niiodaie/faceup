@@ -148,7 +148,6 @@ function App() {
     <Route path="*" element={<NotFound />} />
     </Routes>
   </Router>
-);
 }
 
           element={session ? (
