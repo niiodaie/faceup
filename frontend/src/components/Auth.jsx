@@ -101,20 +101,43 @@ const handleSignUp = async (e) => {
             </div>
             
             <Button
-              onClick={onGuestDemo}
-              variant="outline"
-              className="w-full py-3 rounded-lg font-bold text-lg border-purple-300 text-purple-600 hover:bg-purple-50 transition-all duration-300 flex items-center justify-center gap-2"
-            >
-              <Eye className="h-5 w-5" />
-              <Button
   onClick={handleGoogleLogin}
-  className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
+  className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 mt-4"
 >
+  <svg
+    className="h-5 w-5"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 48 48"
+  >
+    <path
+      fill="#FFC107"
+      d="M43.6 20.5h-1.9v-.1H24v7.1h11.3c-1.6 4.3-5.7 7.4-10.6 7.4-6.2 0-11.3-5-11.3-11.3s5-11.3 11.3-11.3c2.9 0 5.5 1.1 7.5 2.9l5.3-5.3C34.6 6.5 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 20-8.9 20-20 0-1.3-.1-2.7-.4-4z"
+    />
+    <path
+      fill="#FF3D00"
+      d="M6.3 14.1l5.9 4.3c1.6-3 4.2-5.4 7.5-6.6L14 8.3C10.7 10.1 8.1 12.8 6.3 14.1z"
+    />
+    <path
+      fill="#4CAF50"
+      d="M24 44c5.4 0 10.2-2 13.8-5.3l-6.4-5.2c-2 1.6-4.6 2.6-7.4 2.6-4.9 0-9-3.1-10.6-7.4l-6.3 4.9C10 39.7 16.6 44 24 44z"
+    />
+    <path
+      fill="#1976D2"
+      d="M43.6 20.5H42v-.1H24v7.1h11.3c-.9 2.4-2.6 4.4-4.7 5.9l6.4 5.2C40.6 35.3 44 30.3 44 24c0-1.3-.1-2.7-.4-3.5z"
+    />
+  </svg>
   Continue with Google
 </Button>
 
-              Try Guest Demo
-            </Button>
+<Button
+  onClick={onGuestDemo}
+  variant="outline"
+  className="w-full py-3 mt-2 rounded-lg font-bold text-lg border-purple-300 text-purple-600 hover:bg-purple-50 transition-all duration-300 flex items-center justify-center gap-2"
+>
+  <Eye className="h-5 w-5" />
+  Try Guest Demo
+</Button>
+
           </div>
         </CardContent>
       </Card>
