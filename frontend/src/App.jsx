@@ -43,25 +43,16 @@ function App() {
    return (
   <Router>
     <Routes>
-      {!session ? (
-        <Route
-          path="/"
-          element={<IntroPage onGuestDemo={() => setGuestMode(true)} />}
-        />
-      ) : (
-        <Route
-          path="/"
-          element={<Navigate to="/login" />}
-        />
-      )}
+      <Route path="/" element={<IntroPage onGuestDemo={() => setGuestMode(true)} />} />
+      <Route path="/login" element={<Auth onGuestDemo={() => setGuestMode(true)} />} />
       <Route
-        path="/login"
-        element={<Auth onGuestDemo={() => setGuestMode(true)} />}
+        path="/dashboard"
+        element={session ? <Dashboard /> : <Navigate to="/login" />}
       />
-      {/* Add additional routes as needed */}
     </Routes>
   </Router>
 );
+
 
 
   }, []);
