@@ -6,7 +6,7 @@ import FaceScanCard from './components/FaceScanCard';
 import MoodSelector from './components/MoodSelector';
 import CutMatchSuggestions from './components/CutMatchSuggestions';
 import ActionButton from './components/ActionButton';
-import IntroPage from './pages/IntroPage';
+import IntroPage from './components/IntroPage';
 import Auth from './components/Auth';
 import GuestDemo from './components/GuestDemo';
 import UpgradePrompt from './components/UpgradePrompt';
