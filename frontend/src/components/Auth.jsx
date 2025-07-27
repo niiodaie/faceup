@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -10,6 +11,27 @@ const Auth = ({ onGuestDemo }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        console.log('Session restored:', session.user);
+        // 🔁 Redirect to dashboard or homepage
+      window.location.href = '/'; // or any other valid route
+
+      }
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        console.log('Auth state changed:', session.user);
+      }
+    });
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
 
   const handleLogin = async (e) => {
   e.preventDefault();
