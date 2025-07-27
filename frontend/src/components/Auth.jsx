@@ -22,9 +22,13 @@ const Auth = ({ onGuestDemo }) => {
 const handleGoogleLogin = async () => {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
+    options: {
+      redirectTo: window.location.origin, // auto-uses localhost or vercel
+    },
   });
   if (error) alert(error.message);
 };
+
 
 const handleSignUp = async (e) => {
   e.preventDefault();
