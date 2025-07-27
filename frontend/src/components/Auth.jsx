@@ -12,27 +12,28 @@ const Auth = ({ onGuestDemo }) => {
   const [isSignUp, setIsSignUp] = useState(false);
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) alert(error.message);
-    setLoading(false);
+  e.preventDefault();
+  setLoading(true);
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) alert(error.message);
+  setLoading(false);
+};
 
-  const handleGoogleLogin = async () => {
+const handleGoogleLogin = async () => {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
   });
   if (error) alert(error.message);
+};
 
-  };
+const handleSignUp = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  const { error } = await supabase.auth.signUp({ email, password });
+  if (error) alert(error.message);
+  setLoading(false);
+};
 
-  const handleSignUp = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    const { error } = await supabase.auth.signUp({ email, password });
-    if (error) alert(error.message);
-    setLoading(false);
-  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100 p-4">
