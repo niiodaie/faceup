@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useEffect } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -12,29 +11,6 @@ const Auth = ({ onGuestDemo }) => {
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
 
-  useEffect(() => {
-  const timer = setTimeout(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        console.log('Session restored:', session.user);
-        window.location.href = '/';
-      }
-    });
-  }, 300); // wait 300ms
-
-  const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-    if (session) {
-      console.log('Auth state changed:', session.user);
-    }
-  });
-
-  return () => {
-    clearTimeout(timer);
-    listener.subscription.unsubscribe();
-  };
-}, []);
-
-
   const handleLogin = async (e) => {
   e.preventDefault();
   setLoading(true);
@@ -46,13 +22,9 @@ const Auth = ({ onGuestDemo }) => {
 const handleGoogleLogin = async () => {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: {
-      redirectTo: window.location.origin, // auto-uses localhost or vercel
-    },
   });
   if (error) alert(error.message);
 };
-
 
 const handleSignUp = async (e) => {
   e.preventDefault();
