@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../utils/supabaseClient';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -6,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Eye } from 'lucide-react';
 
 const Auth = ({ onGuestDemo }) => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -14,8 +16,12 @@ const Auth = ({ onGuestDemo }) => {
   const handleLogin = async (e) => {
   e.preventDefault();
   setLoading(true);
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) alert(error.message);
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) {
+    alert(error.message);
+  } else {
+    navigate('/app');
+  }
   setLoading(false);
 };
 
