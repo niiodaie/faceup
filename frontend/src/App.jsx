@@ -40,15 +40,29 @@ function App() {
       setUser(session?.user || null);
     });
 
-    return (
+   return (
   <Router>
     <Routes>
-      <Route path="/" element={<IntroPage onGuestDemo={() => setGuestMode(true)} />} />
-      <Route path="/login" element={<Auth onGuestDemo={() => setGuestMode(true)} />} />
+      {!session ? (
+        <Route
+          path="/"
+          element={<IntroPage onGuestDemo={() => setGuestMode(true)} />}
+        />
+      ) : (
+        <Route
+          path="/"
+          element={<Navigate to="/login" />}
+        />
+      )}
+      <Route
+        path="/login"
+        element={<Auth onGuestDemo={() => setGuestMode(true)} />}
+      />
       {/* Add additional routes as needed */}
     </Routes>
   </Router>
 );
+
 
   }, []);
 
