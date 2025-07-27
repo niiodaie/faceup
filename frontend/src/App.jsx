@@ -117,29 +117,31 @@ function App() {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/guest" element={<GuestDemo onSignUp={() => setGuestMode(false)} />} />
       <Route
-        path="/app"
-        element={
-          session ? (
-            guestMode ? (
-              <GuestDemo onSignUp={() => setGuestMode(false)} />
-            ) : (
-              <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100">
-                <div className="max-w-md mx-auto">
-                  <Header
-                    onLanguageToggle={handleLanguageToggle}
-                    currentLanguage={currentLanguage}
-                    session={session}
-                    user={user}
-                  />
-                  {/* App content here */}
-                </div>
-              </div>
-            )
-          ) : (
-            <Navigate to="/login" />
-          )
-        }
-      />
+        <Route
+  path="/app"
+  element={
+    session ? (
+      guestMode ? (
+        <GuestDemo onSignUp={() => setGuestMode(false)} />
+      ) : (
+        <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100">
+          <div className="max-w-md mx-auto">
+            <Header
+              onLanguageToggle={handleLanguageToggle}
+              currentLanguage={currentLanguage}
+              session={session}
+              user={user}
+            />
+            {/* App content here */}
+          </div>
+        </div>
+      )
+    ) : (
+      <Navigate to="/login" />
+    )
+  }
+/>
+
       <Route path="*" element={<NotFound />} />
     </Routes>
   </Router>
