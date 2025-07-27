@@ -18,7 +18,7 @@ const Auth = ({ onGuestDemo }) => {
     if (error) alert(error.message);
     setLoading(false);
 
-    const handleGoogleLogin = async () => {
+  const handleGoogleLogin = async () => {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
   });
