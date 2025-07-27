@@ -145,132 +145,131 @@ function App() {
       }
     />
 
-              <Route
-            path="/app"
-            element={
-              session ? (
-                guestMode ? (
-                  <GuestDemo onSignUp={() => setGuestMode(false)} />
-                ) : (
-                  <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100">
-                    <div className="max-w-md mx-auto">
-                      <Header
-                        onLanguageToggle={handleLanguageToggle}
-                        currentLanguage={currentLanguage}
-                        session={session}
-                        user={user}
-                        userRole={userRole}
-                        onLogout={handleLogout}
-                      />
+       <Route
+          path="/"
+          element={
+            session ? (
+              guestMode ? (
+                <GuestDemo onSignUp={() => setGuestMode(false)} />
+              ) : (
+                <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100">
+                  <div className="max-w-md mx-auto">
+                    <Header
+                      onLanguageToggle={handleLanguageToggle}
+                      currentLanguage={currentLanguage}
+                      session={session}
+                      user={user}
+                      userRole={userRole}
+                      onLogout={handleLogout}
+                    />
 
-                      <main className="px-4 pb-8">
-                        <div className="main-card-wrapper p-6 mx-2 mb-8">
-                          <div className="text-center mb-8">
-                            <h1 className="text-5xl font-bold gradient-text mb-3">FACEUP</h1>
-                            <p className="text-gray-600 text-lg font-medium">Be Seen. Be Styled. Be You.</p>
-                            {userRole && (
-                              <div className="mt-2">
-                                <span
-                                  className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                                    userRole === 'pro'
-                                      ? 'bg-purple-100 text-purple-800'
-                                      : userRole === 'free'
-                                      ? 'bg-blue-100 text-blue-800'
-                                      : 'bg-gray-100 text-gray-800'
-                                  }`}
-                                >
-                                  {userRole.toUpperCase()} USER
-                                </span>
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="space-y-8">
-                            <FaceScanCard
-                              onFaceScan={handleFaceScan}
-                              onCapture={handleCaptureImage}
-                              isScanning={isScanning}
-                              userRole={userRole}
-                              hasAccess={hasAccess}
-                            />
-
-                            {capturedImage && (
-                              <div className="flex justify-center">
-                                <div className="polaroid-frame">
-                                  <img
-                                    src={capturedImage}
-                                    alt="Captured face"
-                                    className="w-32 h-40 object-cover rounded"
-                                  />
-                                </div>
-                              </div>
-                            )}
-
-                            <MoodSelector
-                              selectedMoods={selectedMoods}
-                              onMoodToggle={handleMoodToggle}
-                              title="What's today about?"
-                            />
-
-                            <CutMatchSuggestions
-                              userRole={userRole}
-                              hasAccess={hasAccess}
-                              selectedMoods={selectedMoods}
-                            />
-
-                            <ActionButton onClick={handleTryAR}>
-                              SWIPE, SAVE, TRY AR
-                            </ActionButton>
-
-                            <AffiliateLinks userRole={userRole} />
-                          </div>
+                    <main className="px-4 pb-8">
+                      <div className="main-card-wrapper p-6 mx-2 mb-8">
+                        <div className="text-center mb-8">
+                          <h1 className="text-5xl font-bold gradient-text mb-3">FACEUP</h1>
+                          <p className="text-gray-600 text-lg font-medium">Be Seen. Be Styled. Be You.</p>
+                          {userRole && (
+                            <div className="mt-2">
+                              <span
+                                className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                                  userRole === 'pro'
+                                    ? 'bg-purple-100 text-purple-800'
+                                    : userRole === 'free'
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : 'bg-gray-100 text-gray-800'
+                                }`}
+                              >
+                                {userRole.toUpperCase()} USER
+                              </span>
+                            </div>
+                          )}
                         </div>
-                      </main>
-                    </div>
 
-                    {showUpgradePrompt && (
-                      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                        <div className="relative">
-                          <button
-                            onClick={() => setShowUpgradePrompt(null)}
-                            className="absolute -top-2 -right-2 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg z-10"
-                          >
-                            ×
-                          </button>
-                          <UpgradePrompt
-                            feature={showUpgradePrompt}
+                        <div className="space-y-8">
+                          <FaceScanCard
+                            onFaceScan={handleFaceScan}
+                            onCapture={handleCaptureImage}
+                            isScanning={isScanning}
                             userRole={userRole}
-                            onUpgrade={handleUpgrade}
+                            hasAccess={hasAccess}
                           />
+
+                          {capturedImage && (
+                            <div className="flex justify-center">
+                              <div className="polaroid-frame">
+                                <img
+                                  src={capturedImage}
+                                  alt="Captured face"
+                                  className="w-32 h-40 object-cover rounded"
+                                />
+                              </div>
+                            </div>
+                          )}
+
+                          <MoodSelector
+                            selectedMoods={selectedMoods}
+                            onMoodToggle={handleMoodToggle}
+                            title="What's today about?"
+                          />
+
+                          <CutMatchSuggestions
+                            userRole={userRole}
+                            hasAccess={hasAccess}
+                            selectedMoods={selectedMoods}
+                          />
+
+                          <ActionButton onClick={handleTryAR}>
+                            SWIPE, SAVE, TRY AR
+                          </ActionButton>
+
+                          <AffiliateLinks userRole={userRole} />
                         </div>
                       </div>
-                    )}
-
-                    <a
-                      href="https://visnec.ai"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="fixed bottom-4 right-4 z-50 group"
-                      title="Powered by VNX"
-                    >
-                      <img
-                        src="/vnx-icon.png"
-                        alt="VNX"
-                        className="w-8 h-8 opacity-50 hover:opacity-100 transition-all duration-300 group-hover:scale-110 drop-shadow-lg"
-                      />
-                    </a>
+                    </main>
                   </div>
-                )
-              ) : (
-                <Navigate to="/login" />
+
+                  {showUpgradePrompt && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                      <div className="relative">
+                        <button
+                          onClick={() => setShowUpgradePrompt(null)}
+                          className="absolute -top-2 -right-2 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg z-10"
+                        >
+                          ×
+                        </button>
+                        <UpgradePrompt
+                          feature={showUpgradePrompt}
+                          userRole={userRole}
+                          onUpgrade={handleUpgrade}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <a
+                    href="https://visnec.ai"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="fixed bottom-4 right-4 z-50 group"
+                    title="Powered by VNX"
+                  >
+                    <img
+                      src="/vnx-icon.png"
+                      alt="VNX"
+                      className="w-8 h-8 opacity-50 hover:opacity-100 transition-all duration-300 group-hover:scale-110 drop-shadow-lg"
+                    />
+                  </a>
+                </div>
               )
-            }
-          />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Router>
+  );
+}
 
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
-    );
-  }
-
-  export default App;
+export default App;
