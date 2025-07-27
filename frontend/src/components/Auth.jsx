@@ -17,6 +17,13 @@ const Auth = ({ onGuestDemo }) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) alert(error.message);
     setLoading(false);
+
+    const handleGoogleLogin = async () => {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+  });
+  if (error) alert(error.message);
+
   };
 
   const handleSignUp = async (e) => {
