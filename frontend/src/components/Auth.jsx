@@ -105,6 +105,13 @@ const Auth = ({ onGuestDemo }) => {
               className="w-full py-3 rounded-lg font-bold text-lg border-purple-300 text-purple-600 hover:bg-purple-50 transition-all duration-300 flex items-center justify-center gap-2"
             >
               <Eye className="h-5 w-5" />
+              <Button
+  onClick={handleGoogleLogin}
+  className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
+>
+  Continue with Google
+</Button>
+
               Try Guest Demo
             </Button>
           </div>
