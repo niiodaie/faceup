@@ -1,3 +1,4 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import Header from './components/Header';
@@ -5,6 +6,7 @@ import FaceScanCard from './components/FaceScanCard';
 import MoodSelector from './components/MoodSelector';
 import CutMatchSuggestions from './components/CutMatchSuggestions';
 import ActionButton from './components/ActionButton';
+import IntroPage from './pages/IntroPage';
 import Auth from './components/Auth';
 import GuestDemo from './components/GuestDemo';
 import UpgradePrompt from './components/UpgradePrompt';
@@ -38,7 +40,16 @@ function App() {
       setUser(session?.user || null);
     });
 
-    return () => subscription.unsubscribe();
+    return (
+  <Router>
+    <Routes>
+      <Route path="/" element={<IntroPage onGuestDemo={() => setGuestMode(true)} />} />
+      <Route path="/login" element={<Auth onGuestDemo={() => setGuestMode(true)} />} />
+      {/* Add additional routes as needed */}
+    </Routes>
+  </Router>
+);
+
   }, []);
 
   const handleLogout = async () => {
