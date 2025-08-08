@@ -1,4 +1,4 @@
-import { Routes, Route, BrowserRouter as Router, Navigate } from 'react-router-dom';
+import { Routes, Route, BrowserRouter as Router, Navigate, useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import Header from './components/Header';
@@ -11,10 +11,14 @@ import Auth from './components/Auth';
 import GuestDemo from './components/GuestDemo';
 import UpgradePrompt from './components/UpgradePrompt';
 import AffiliateLinks from './components/AffiliateLinks';
+import SocialShare from './components/SocialShare';
+import NotFound from './components/NotFound';
+import FaceScanPage from './FaceScanPage';
 import { supabase } from './utils/supabaseClient';
 import { useUserRole, hasAccess } from './hooks/useUserRole';
 
-function App() {
+function AppContent() {
+  const navigate = useNavigate();
   const [selectedMoods, setSelectedMoods] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('EN');
@@ -90,6 +94,7 @@ function App() {
 
   const handleGuestDemo = () => {
     setGuestMode(true);
+    navigate('/app');
   };
 
   if (loading) {
@@ -104,22 +109,25 @@ function App() {
   }
 
   return (
-    <Router>
-      <Routes>
-        <Route
-          path="/"
-          element={session ? <Navigate to="/app" /> : <IntroPage onGuestDemo={handleGuestDemo} />}
-        />
-        <Route
-          path="/login"
-          element={<Auth onGuestDemo={handleGuestDemo} />}
-        />
-        <Route
-          path="/app"
-          element={session ? (
-            guestMode ? (
-              <GuestDemo onSignUp={() => setGuestMode(false)} />
-            ) : (
+    <Routes>
+      <Route
+        path="/"
+        element={session ? <Navigate to="/app" /> : <IntroPage onGuestDemo={handleGuestDemo} />}
+      />
+      <Route
+        path="/login"
+        element={<Auth onGuestDemo={handleGuestDemo} />}
+      />
+      <Route
+        path="/face-scan"
+        element={<FaceScanPage />}
+      />
+      <Route
+        path="/app"
+        element={session || guestMode ? (
+          guestMode ? (
+            <GuestDemo onSignUp={() => setGuestMode(false)} />
+          ) : (
               <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100">
                 <div className="max-w-md mx-auto">
                   <Header
@@ -187,6 +195,11 @@ function App() {
                         </ActionButton>
 
                         <AffiliateLinks userRole={userRole} />
+                        
+                        <SocialShare 
+                          title="Check out my FaceUp style transformation!"
+                          url={window.location.href}
+                        />
                       </div>
                     </div>
                   </main>
@@ -229,7 +242,15 @@ function App() {
             <Navigate to="/login" />
           )}
         />
+        <Route path="*" element={<NotFound />} />
       </Routes>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }

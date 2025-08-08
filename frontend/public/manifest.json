@@ -1,0 +1,28 @@
+{
+  "name": "FaceUp - Be Seen. Be Styled. Be You.",
+  "short_name": "FaceUp",
+  "description": "AI-powered beauty and style recommendations",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#A100EC",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/faceup-app-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/faceup-app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["beauty", "lifestyle", "personalization"],
+  "lang": "en",
+  "dir": "ltr"
+}
+

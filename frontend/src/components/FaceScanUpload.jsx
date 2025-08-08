@@ -18,22 +18,49 @@ const FaceScanUpload = () => {
 
   const handleSubmit = async () => {
     if (!image) return;
-
     setLoading(true);
     setError(null);
 
-    const formData = new FormData();
-    formData.append('image', image);
-
     try {
-      const res = await fetch('/api/face-scan', {
-        method: 'POST',
-        body: formData,
-      });
+      // Simulate API call with mock data
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const mockResponse = {
+        face_shape: "round",
+        skin_status: {
+          acne: 0.3,
+          dark_circle: 0.4,
+          wrinkles: 0.2,
+          skin_tone: "medium"
+        },
+        recommendations: [
+          {
+            name: "SKKN Eye Cream",
+            link: "https://amzn.to/skkn",
+            reason: "Recommended for dark circles",
+            price: "$45",
+            rating: 4.5
+          },
+          {
+            name: "Gentle Acne Treatment",
+            link: "https://amzn.to/acne-treatment",
+            reason: "Helps reduce acne appearance",
+            price: "$28",
+            rating: 4.3
+          },
+          {
+            name: "Hydrating Face Serum",
+            link: "https://amzn.to/face-serum",
+            reason: "Perfect for your skin tone",
+            price: "$35",
+            rating: 4.7
+          }
+        ],
+        confidence: 0.85,
+        analysis_time: "2.3s"
+      };
 
-      if (!res.ok) throw new Error('Failed to analyze image');
-      const data = await res.json();
-      setResult(data);
+      setResult(mockResponse);
     } catch (err) {
       setError(err.message || 'Something went wrong');
     } finally {
@@ -89,3 +116,4 @@ const FaceScanUpload = () => {
 };
 
 export default FaceScanUpload;
+
