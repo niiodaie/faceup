@@ -1,5 +1,5 @@
-import { Routes, Route, BrowserRouter as Router, Navigate, useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import './App.css';
 import Header from './components/Header';
 import FaceScanCard from './components/FaceScanCard';
@@ -14,7 +14,18 @@ import AffiliateLinks from './components/AffiliateLinks';
 import SocialShare from './components/SocialShare';
 import NotFound from './components/NotFound';
 import FaceScanPage from './FaceScanPage';
-import { supabase } from './utils/supabaseClient';
+import ProtectedRoute, { AuthenticatedRoute, GuestAllowedRoute, PublicRoute } from './components/ProtectedRoute';
+
+// New authentication components
+import SignUp from './components/auth/SignUp';
+import Login from './components/auth/Login';
+import PhoneAuth from './components/auth/PhoneAuth';
+import AuthCallback from './pages/auth/callback';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
+
+// Session management
+import { SessionProvider, useSession } from './hooks/useSession.jsx';
 import { useUserRole, hasAccess } from './hooks/useUserRole';
 
 function AppContent() {
@@ -23,37 +34,35 @@ function AppContent() {
   const [isScanning, setIsScanning] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('EN');
   const [capturedImage, setCapturedImage] = useState(null);
-  const [session, setSession] = useState(null);
-  const [user, setUser] = useState(null);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(null);
-  const [guestMode, setGuestMode] = useState(false);
 
-  const { userRole, loading } = useUserRole(user);
+  const { 
+    session, 
+    user, 
+    loading, 
+    isGuest, 
+    userRole, 
+    signOut, 
+    enableGuestMode, 
+    disableGuestMode 
+  } = useSession();
 
   useEffect(() => {
     const storedLang = localStorage.getItem('language');
     if (storedLang) setCurrentLanguage(storedLang);
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user || null);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user || null);
-    });
-
-    return () => subscription.unsubscribe();
   }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setSession(null);
-    setUser(null);
-    setGuestMode(false);
+    const { error } = await signOut();
+    if (!error) {
+      navigate('/');
+    }
   };
 
+  const handleGuestDemo = () => {
+    enableGuestMode();
+    navigate('/app');
+  };
   const handleMoodToggle = (mood) => {
     setSelectedMoods(prev =>
       prev.includes(mood) ? prev.filter(m => m !== mood) : [...prev, mood]
@@ -92,11 +101,6 @@ function AppContent() {
     alert('Upgrade functionality will be implemented in Phase 3 with Stripe integration');
   };
 
-  const handleGuestDemo = () => {
-    setGuestMode(true);
-    navigate('/app');
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100 flex items-center justify-center">
@@ -110,24 +114,80 @@ function AppContent() {
 
   return (
     <Routes>
+      {/* Public Routes */}
       <Route
         path="/"
-        element={session ? <Navigate to="/app" /> : <IntroPage onGuestDemo={handleGuestDemo} />}
+        element={
+          <PublicRoute>
+            <IntroPage onGuestDemo={handleGuestDemo} />
+          </PublicRoute>
+        }
+      />
+      
+      {/* Authentication Routes */}
+      <Route
+        path="/signup"
+        element={
+          <PublicRoute>
+            <SignUp />
+          </PublicRoute>
+        }
       />
       <Route
         path="/login"
-        element={<Auth onGuestDemo={handleGuestDemo} />}
+        element={
+          <PublicRoute>
+            <Login onGuestDemo={handleGuestDemo} />
+          </PublicRoute>
+        }
       />
       <Route
-        path="/face-scan"
-        element={<FaceScanPage />}
+        path="/auth/forgot-password"
+        element={
+          <PublicRoute>
+            <ForgotPassword />
+          </PublicRoute>
+        }
       />
+      <Route
+        path="/auth/reset"
+        element={
+          <PublicRoute>
+            <ResetPassword />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/auth/verify-phone"
+        element={
+          <PublicRoute>
+            <PhoneAuth />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/auth/callback"
+        element={<AuthCallback />}
+      />
+      
+      {/* Legacy auth route for backward compatibility */}
+      <Route
+        path="/auth"
+        element={
+          <PublicRoute>
+            <Auth onGuestDemo={handleGuestDemo} />
+          </PublicRoute>
+        }
+      />
+      
+      {/* Protected Routes */}
       <Route
         path="/app"
-        element={session || guestMode ? (
-          guestMode ? (
-            <GuestDemo onSignUp={() => setGuestMode(false)} />
-          ) : (
+        element={
+          <GuestAllowedRoute>
+            {isGuest ? (
+              <GuestDemo onSignUp={() => disableGuestMode()} />
+            ) : (
               <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100">
                 <div className="max-w-md mx-auto">
                   <Header
@@ -237,20 +297,32 @@ function AppContent() {
                   />
                 </a>
               </div>
-            )
-          ) : (
-            <Navigate to="/login" />
-          )}
-        />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+            )}
+          </GuestAllowedRoute>
+        }
+      />
+      
+      <Route
+        path="/face-scan"
+        element={
+          <GuestAllowedRoute>
+            <FaceScanPage />
+          </GuestAllowedRoute>
+        }
+      />
+      
+      {/* Catch all route */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
 
 function App() {
   return (
     <Router>
-      <AppContent />
+      <SessionProvider>
+        <AppContent />
+      </SessionProvider>
     </Router>
   );
 }
