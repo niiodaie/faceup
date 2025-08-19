@@ -62,7 +62,7 @@ FaceUp is an AI-powered beauty and style recommendation app that helps users dis
 2. **Install dependencies**
    ```bash
    pnpm install
-   ```
+   ``
 
 3. **Environment Configuration**
    ```bash
