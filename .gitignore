@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Node modules
 node_modules/
 
@@ -20,3 +21,9 @@ pnpm-debug.log*
 # Editor/OS cruft
 .vscode/
 .DS_Store
+=======
+node_modules/
+frontend/node_modules/
+dist/
+build/
+>>>>>>> b4250f82 (chore: ignore node_modules and build outputs)
