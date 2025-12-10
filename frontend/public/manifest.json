@@ -1,0 +1,76 @@
+{
+  "name": "FaceUp - AI-Powered Hairstyle Recommendations",
+  "short_name": "FaceUp",
+  "description": "Discover your perfect hairstyle with AI-powered face analysis. Get personalized beauty insights and hairstyle recommendations based on your unique features.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#A100EC",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/faceup-app-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/faceup-app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/faceup-favicon.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/faceup-ui-clean.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/faceup-pinky-ui.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "categories": ["beauty", "lifestyle", "personalization", "health"],
+  "lang": "en",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "shortcuts": [
+    {
+      "name": "Start Face Scan",
+      "short_name": "Scan",
+      "description": "Start a new face scan",
+      "url": "/app",
+      "icons": [
+        {
+          "src": "/faceup-app-icon.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Guest Demo",
+      "short_name": "Demo",
+      "description": "Try guest demo",
+      "url": "/demo",
+      "icons": [
+        {
+          "src": "/faceup-app-icon.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}
