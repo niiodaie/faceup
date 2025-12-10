@@ -1,240 +1,127 @@
-import { v4 as uuidv4 } from 'uuid';
-import { analyzeFace } from './replicateService.js';
-import { generateHairstyleSuggestions } from './openaiService.js';
-import {
-  saveFaceScanSession,
-  updateFaceScanSession,
-  saveHairstyleSuggestions,
-  uploadImage
-} from './supabaseService.js';
+import dotenv from "dotenv";
+import { runReplicateModel, getPredictionStatus } from "./replicateService.js";
+
+dotenv.config();
 
 /**
- * Handle face scan request
- * POST /face-scan
+ * 1. ANALYZE FACE
+ * Using Replicate Face Detection / Attribute Model (REST API)
  */
-export async function handleFaceScan(req, res) {
+export async function analyzeFace(imageUrl) {
   try {
-    const { userId, imageUrl, mood, style, gender } = req.body;
+    console.log("Starting face analysis with Replicate REST API…");
 
-    // Validate required fields
-    if (!imageUrl) {
-      return res.status(400).json({
-        error: 'Missing required field: imageUrl'
-      });
-    }
+    // MODEL: Replace with the actual model version you want to use
+    const MODEL_VERSION =
+      "andreasjansson/face-detection:6c5e5e9f0c1a8c3e8e9f0c1a8c3e8e9f0c1a8c3e";
 
-    // Generate unique session ID
-    const sessionId = uuidv4();
-
-    console.log(`Starting face scan for session: ${sessionId}`);
-
-    // Save initial session to database
-    await saveFaceScanSession({
-      sessionId,
-      userId: userId || null,
-      imageUrl,
-      mood: mood || 'versatile',
-      style: style || 'modern'
+    // 1) Start prediction
+    const prediction = await runReplicateModel(MODEL_VERSION, {
+      image: imageUrl,
+      return_attributes: true,
     });
 
-    // Start async processing (don't wait for completion)
-    processFaceScan(sessionId, imageUrl, mood, style, gender).catch(error => {
-      console.error(`Error processing face scan ${sessionId}:`, error);
-      updateFaceScanSession(sessionId, {
-        status: 'failed',
-        error_message: error.message
-      });
-    });
+    // 2) Poll until complete
+    const output = await getPredictionStatus(prediction.id);
 
-    // Return immediately with session ID
-    res.json({
-      sessionId,
-      status: 'processing',
-      message: 'Face scan started. Use /scan-status/:sessionId to check progress.'
-    });
+    console.log("Face analysis completed.");
 
+    return parseFaceAnalysis(output.output);
   } catch (error) {
-    console.error('Error handling face scan request:', error);
-    res.status(500).json({
-      error: 'Failed to start face scan',
-      message: error.message
-    });
+    console.error("Error analyzing face:", error);
+    throw new Error(`Face analysis failed: ${error.message}`);
   }
 }
 
 /**
- * Process face scan asynchronously
+ * 2. PARSE FACE ATTRIBUTES
  */
-async function processFaceScan(sessionId, imageUrl, mood, style, gender) {
-  try {
-    console.log(`Processing face scan: ${sessionId}`);
+function parseFaceAnalysis(output) {
+  if (!output) return { error: "No analysis returned" };
 
-    // Update status to analyzing
-    await updateFaceScanSession(sessionId, {
-      status: 'analyzing',
-      progress: 25
+  // Adjust based on actual Replicate model output
+  const analysis = {
+    faceShape: detectFaceShape(output),
+    skinTone: detectSkinTone(output),
+    facialFeatures: {
+      eyeShape: output.eye_shape || "almond",
+      jawline: output.jawline || "soft",
+      cheekbones: output.cheekbones || "medium",
+    },
+    skinAnalysis: {
+      texture: output.skin_texture || "smooth",
+      clarity: output.skin_clarity || 0.8,
+    },
+    confidence: output.confidence || 0.9,
+    rawOutput: output,
+  };
+
+  return analysis;
+}
+
+function detectFaceShape(output) {
+  return output.face_shape || "oval";
+}
+
+function detectSkinTone(output) {
+  return output.skin_tone || "medium";
+}
+
+/**
+ * 3. GENERATE HAIRSTYLE VISUALIZATION
+ * Uses Stable Diffusion / Img2Img REST.
+ */
+export async function generateHairstyleVisualization(
+  imageUrl,
+  hairstyleDescription
+) {
+  try {
+    console.log("Generating hairstyle visualization…");
+
+    const MODEL_VERSION =
+      "stability-ai/stable-diffusion:db21e45d3f7023abc2a46ee38a23973f6dce16bb082a930b0c49861f96d1e5bf";
+
+    const prediction = await runReplicateModel(MODEL_VERSION, {
+      image: imageUrl,
+      prompt: `Professional hairstyle: ${hairstyleDescription}, beauty portrait, high definition`,
+      num_outputs: 1,
+      guidance_scale: 7.5,
+      num_inference_steps: 55,
     });
 
-    // Step 1: Analyze face with Replicate
-    let faceAnalysis;
-    try {
-      faceAnalysis = await analyzeFace(imageUrl);
-    } catch (error) {
-      console.error('Replicate analysis failed, using fallback:', error);
-      // Fallback to basic analysis
-      faceAnalysis = {
-        faceShape: 'oval',
-        skinTone: 'medium',
-        facialFeatures: {
-          eyeShape: 'almond',
-          faceLength: 'medium',
-          jawline: 'soft',
-          cheekbones: 'medium'
-        },
-        confidence: 0.75
-      };
+    const result = await getPredictionStatus(prediction.id);
+
+    if (result.output && result.output.length > 0) {
+      return result.output[0];
     }
 
-    // Update progress
-    await updateFaceScanSession(sessionId, {
-      status: 'generating_suggestions',
-      progress: 50,
-      face_analysis: faceAnalysis
-    });
-
-    // Step 2: Generate hairstyle suggestions with OpenAI
-    const suggestions = await generateHairstyleSuggestions(faceAnalysis, {
-      mood,
-      style,
-      gender
-    });
-
-    // Update progress
-    await updateFaceScanSession(sessionId, {
-      status: 'saving_results',
-      progress: 75
-    });
-
-    // Step 3: Save suggestions to database
-    await saveHairstyleSuggestions(sessionId, suggestions.hairstyles);
-
-    // Step 4: Mark as completed
-    await updateFaceScanSession(sessionId, {
-      status: 'completed',
-      progress: 100,
-      result_data: {
-        faceAnalysis,
-        suggestions: suggestions.hairstyles,
-        generalAdvice: suggestions.generalAdvice
-      }
-    });
-
-    console.log(`Face scan completed: ${sessionId}`);
-
+    return null;
   } catch (error) {
-    console.error(`Error in processFaceScan for ${sessionId}:`, error);
-    throw error;
+    console.error("Error generating hairstyle visualization:", error);
+    return null;
   }
 }
 
 /**
- * Get scan status
- * GET /scan-status/:sessionId
+ * 4. SIMPLE FACE DETECTION (fallback)
  */
-export async function getScanStatus(req, res) {
+export async function detectFaceFeatures(imageUrl) {
   try {
-    const { sessionId } = req.params;
+    const MODEL_VERSION = "andreasjansson/face-detection:latest";
 
-    if (!sessionId) {
-      return res.status(400).json({
-        error: 'Missing sessionId parameter'
-      });
-    }
-
-    // Import here to avoid circular dependency
-    const { getFaceScanSession, getHairstyleSuggestions } = await import('./supabaseService.js');
-    
-    const session = await getFaceScanSession(sessionId);
-
-    if (!session) {
-      return res.status(404).json({
-        error: 'Session not found'
-      });
-    }
-
-    // If completed, include suggestions
-    let suggestions = null;
-    if (session.status === 'completed') {
-      suggestions = await getHairstyleSuggestions(sessionId);
-    }
-
-    res.json({
-      sessionId: session.id,
-      status: session.status,
-      progress: session.progress || 0,
-      faceAnalysis: session.face_analysis,
-      suggestions: suggestions || session.result_data?.suggestions,
-      generalAdvice: session.result_data?.generalAdvice,
-      error: session.error_message,
-      createdAt: session.created_at,
-      updatedAt: session.updated_at
+    const prediction = await runReplicateModel(MODEL_VERSION, {
+      image: imageUrl,
     });
 
+    const result = await getPredictionStatus(prediction.id);
+
+    return {
+      facesDetected: result.output?.length || 0,
+      boundingBoxes: result.output || [],
+      success: true,
+    };
   } catch (error) {
-    console.error('Error getting scan status:', error);
-    res.status(500).json({
-      error: 'Failed to get scan status',
-      message: error.message
-    });
-  }
-}
-
-/**
- * Get suggestions for a completed scan
- * GET /suggestions/:sessionId
- */
-export async function getSuggestions(req, res) {
-  try {
-    const { sessionId } = req.params;
-
-    if (!sessionId) {
-      return res.status(400).json({
-        error: 'Missing sessionId parameter'
-      });
-    }
-
-    const { getFaceScanSession, getHairstyleSuggestions } = await import('./supabaseService.js');
-    
-    const session = await getFaceScanSession(sessionId);
-
-    if (!session) {
-      return res.status(404).json({
-        error: 'Session not found'
-      });
-    }
-
-    if (session.status !== 'completed') {
-      return res.status(400).json({
-        error: 'Scan not completed yet',
-        status: session.status
-      });
-    }
-
-    const suggestions = await getHairstyleSuggestions(sessionId);
-
-    res.json({
-      sessionId: session.id,
-      faceAnalysis: session.face_analysis,
-      suggestions,
-      generalAdvice: session.result_data?.generalAdvice,
-      createdAt: session.created_at
-    });
-
-  } catch (error) {
-    console.error('Error getting suggestions:', error);
-    res.status(500).json({
-      error: 'Failed to get suggestions',
-      message: error.message
-    });
+    console.error("Error detecting face features:", error);
+    return { facesDetected: 0, success: false, error: error.message };
   }
 }
