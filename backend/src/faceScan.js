@@ -1,127 +1,121 @@
-import dotenv from "dotenv";
 import { runReplicateModel, getPredictionStatus } from "./replicateService.js";
-
-dotenv.config();
+import { supabase } from "./supabaseService.js";
 
 /**
- * 1. ANALYZE FACE
- * Using Replicate Face Detection / Attribute Model (REST API)
+ * =====================================================================
+ *  1. START A FACE SCAN → POST /face-scan
+ * =====================================================================
  */
-export async function analyzeFace(imageUrl) {
+export async function handleFaceScan(req, res) {
   try {
-    console.log("Starting face analysis with Replicate REST API…");
+    const { imageUrl } = req.body;
 
-    // MODEL: Replace with the actual model version you want to use
+    if (!imageUrl) {
+      return res.status(400).json({ error: "Missing imageUrl" });
+    }
+
+    // Start prediction
     const MODEL_VERSION =
       "andreasjansson/face-detection:6c5e5e9f0c1a8c3e8e9f0c1a8c3e8e9f0c1a8c3e";
 
-    // 1) Start prediction
     const prediction = await runReplicateModel(MODEL_VERSION, {
       image: imageUrl,
       return_attributes: true,
     });
 
-    // 2) Poll until complete
-    const output = await getPredictionStatus(prediction.id);
+    // Store session
+    const { data, error } = await supabase
+      .from("face_scan_sessions")
+      .insert({
+        session_id: prediction.id,
+        image_url: imageUrl,
+        status: "processing",
+      })
+      .select()
+      .single();
 
-    console.log("Face analysis completed.");
+    if (error) throw error;
 
-    return parseFaceAnalysis(output.output);
+    return res.json({
+      success: true,
+      sessionId: prediction.id,
+      status: "processing",
+    });
   } catch (error) {
-    console.error("Error analyzing face:", error);
-    throw new Error(`Face analysis failed: ${error.message}`);
+    console.error("Error starting face scan:", error);
+    return res.status(500).json({ error: error.message });
   }
 }
 
 /**
- * 2. PARSE FACE ATTRIBUTES
+ * =====================================================================
+ *  2. GET SCAN STATUS → GET /scan-status/:sessionId
+ * =====================================================================
  */
-function parseFaceAnalysis(output) {
-  if (!output) return { error: "No analysis returned" };
+export async function getScanStatus(req, res) {
+  try {
+    const { sessionId } = req.params;
 
-  // Adjust based on actual Replicate model output
-  const analysis = {
-    faceShape: detectFaceShape(output),
-    skinTone: detectSkinTone(output),
-    facialFeatures: {
-      eyeShape: output.eye_shape || "almond",
-      jawline: output.jawline || "soft",
-      cheekbones: output.cheekbones || "medium",
-    },
-    skinAnalysis: {
-      texture: output.skin_texture || "smooth",
-      clarity: output.skin_clarity || 0.8,
-    },
-    confidence: output.confidence || 0.9,
-    rawOutput: output,
-  };
+    const prediction = await getPredictionStatus(sessionId);
 
-  return analysis;
-}
+    // Update DB
+    await supabase
+      .from("face_scan_sessions")
+      .update({ status: prediction.status })
+      .eq("session_id", sessionId);
 
-function detectFaceShape(output) {
-  return output.face_shape || "oval";
-}
-
-function detectSkinTone(output) {
-  return output.skin_tone || "medium";
+    return res.json({
+      sessionId,
+      status: prediction.status,
+      result: prediction.output || null,
+    });
+  } catch (error) {
+    console.error("Error fetching scan status:", error);
+    return res.status(500).json({ error: error.message });
+  }
 }
 
 /**
- * 3. GENERATE HAIRSTYLE VISUALIZATION
- * Uses Stable Diffusion / Img2Img REST.
+ * =====================================================================
+ *  3. GET SUGGESTIONS → GET /suggestions/:sessionId
+ * =====================================================================
  */
-export async function generateHairstyleVisualization(
-  imageUrl,
-  hairstyleDescription
-) {
+export async function getSuggestions(req, res) {
   try {
-    console.log("Generating hairstyle visualization…");
+    const { sessionId } = req.params;
 
-    const MODEL_VERSION =
-      "stability-ai/stable-diffusion:db21e45d3f7023abc2a46ee38a23973f6dce16bb082a930b0c49861f96d1e5bf";
+    const prediction = await getPredictionStatus(sessionId);
 
-    const prediction = await runReplicateModel(MODEL_VERSION, {
-      image: imageUrl,
-      prompt: `Professional hairstyle: ${hairstyleDescription}, beauty portrait, high definition`,
-      num_outputs: 1,
-      guidance_scale: 7.5,
-      num_inference_steps: 55,
-    });
-
-    const result = await getPredictionStatus(prediction.id);
-
-    if (result.output && result.output.length > 0) {
-      return result.output[0];
+    if (!prediction.output) {
+      return res.status(404).json({
+        error: "Scan not complete or no output available",
+      });
     }
 
-    return null;
+    const suggestions = generateFaceSuggestions(prediction.output);
+
+    return res.json({
+      sessionId,
+      suggestions,
+      raw: prediction.output,
+    });
   } catch (error) {
-    console.error("Error generating hairstyle visualization:", error);
-    return null;
+    console.error("Error generating suggestions:", error);
+    return res.status(500).json({ error: error.message });
   }
 }
 
 /**
- * 4. SIMPLE FACE DETECTION (fallback)
+ * =====================================================================
+ *  4. SUGGESTIONS ENGINE
+ * =====================================================================
  */
-export async function detectFaceFeatures(imageUrl) {
-  try {
-    const MODEL_VERSION = "andreasjansson/face-detection:latest";
-
-    const prediction = await runReplicateModel(MODEL_VERSION, {
-      image: imageUrl,
-    });
-
-    const result = await getPredictionStatus(prediction.id);
-
-    return {
-      facesDetected: result.output?.length || 0,
-      boundingBoxes: result.output || [],
-      success: true,
-    };
-  } catch (error) {
-    console.error("Error detecting face features:", error);
-    return { facesDetected: 0, success: false, error: error.message };
-  }
+function generateFaceSuggestions(output) {
+  // Simple logic (replace with your trained suggestions logic later)
+  return {
+    bestHaircuts: ["High Fade", "Waves", "Taper Fade", "Buzzcut"],
+    beardStyles: ["Goatee", "Short Beard", "Clean Shave"],
+    faceShape: output.face_shape || "oval",
+    skinTone: output.skin_tone || "medium",
+  };
 }
