@@ -19,7 +19,6 @@
   "author": "FaceUp Team",
   "license": "MIT",
   "dependencies": {
-    "dependencies": {
   "@supabase/supabase-js": "^2.52.1",
   "cors": "^2.8.5",
   "dotenv": "^16.4.7",
