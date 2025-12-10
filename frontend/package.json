@@ -53,13 +53,8 @@
     "lucide-react": "^0.510.0",
     "next-themes": "^0.4.6",
     "react": "^18.3.1",
-<<<<<<< HEAD
-    "react-day-picker": "9.0.6",
-    "react-dom": "^13.3.1",
-=======
     "react-day-picker": "^9.9.0",
     "react-dom": "^18.3.1",
->>>>>>> 659a8e1b (chore: clean lockfiles, set frontend as app root, regenerate pnpm lock)
     "react-hook-form": "^7.56.3",
     "react-i18next": "^15.6.1",
     "react-icons": "^5.5.0",
@@ -84,6 +79,5 @@
     "globals": "^16.0.0",
     "tw-animate-css": "^1.2.9",
     "vite": "^6.3.5"
-  },
-  "packageManager": "pnpm@10.4.1+sha512.c753b6c3ad7afa13af388fa6d808035a008e30ea9993f58c6663e2bc5ff21679aa834db094987129aa4d488b86df57f7b634981b2f827cdcacc698cc0cfb88af"
+  }
 }
