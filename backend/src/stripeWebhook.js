@@ -228,11 +228,10 @@ function getPlanType(subscription) {
   // Map price IDs to plan types
   // These should match your Stripe price IDs
   const planMapping = {
-    'price_monthly': 'monthly',
-    'price_yearly': 'yearly',
-    'price_faceup_monthly': 'monthly',
-    'price_faceup_yearly': 'yearly'
-  };
+  'price_1ScpTgDMu46n2OkGbPS5gzqQ': 'yearly',
+  'price_1ScpVuDMu46n2OkGM6fZUv4h': 'monthly',
+};
+
 
   return planMapping[priceId] || 'monthly';
 }
