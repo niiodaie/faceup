@@ -20,15 +20,15 @@
   "license": "MIT",
   "dependencies": {
     "@supabase/supabase-js": "^2.52.1",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "multer": "^1.4.5-lts.1",
-    "node-fetch": "^3.3.2",
-    "openai": "^4.77.3",
-    "replicate": "^0.35.3",
-    "stripe": "^17.5.0",
-    "uuid": "^11.0.3"
+  "cors": "^2.8.5",
+  "dotenv": "^16.4.7",
+  "express": "^4.21.2",
+  "multer": "^1.4.5-lts.1",
+  "node-fetch": "^3.3.2",
+  "openai": "^4.77.3",
+  "replicate": "^0.25.7",
+  "stripe": "^17.5.0",
+  "uuid": "^11.0.3"
   },
   "engines": {
     "node": ">=18.0.0"
