@@ -93,13 +93,24 @@ export default function AppShell() {
   };
 
   // If in guest mode, show guest demo
-  if (isGuest) {
-    return (
-      <Routes>
-        <Route path="/*" element={<GuestDemo onSignUp={() => enableGuestMode()} />} />
-      </Routes>
-    );
-  }
+if (isGuest) {
+  return (
+    <Routes>
+      <Route
+        path="/*"
+        element={
+          <GuestDemo
+            onSignUp={() => {
+              disableGuestMode();  // exit guest mode
+              navigate("/auth/signup");  // go to signup
+            }}
+          />
+        }
+      />
+    </Routes>
+  );
+}
+
 
   // Main app routes for authenticated users
   return (
