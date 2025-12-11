@@ -6,71 +6,119 @@ const SessionContext = createContext();
 export const SessionProvider = ({ children }) => {
   const [session, setSession] = useState(null);
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Guest mode flags
+  // Guest mode
   const [isGuest, setIsGuest] = useState(false);
-  const [guestTrialEnd, setGuestTrialEnd] = useState(null);
 
-  // Load guest mode from storage on boot
+  // Role from database (free, pro)
+  const [userRole, setUserRole] = useState("free");
+
+  // ─────────────────────────────────────────────
+  // INITIALIZATION
+  // ─────────────────────────────────────────────
   useEffect(() => {
-    const storedGuest = localStorage.getItem("faceup_guest_mode");
-    const storedTrial = localStorage.getItem("faceup_trial_end");
+    let mounted = true;
 
-    if (storedGuest === "true") {
-      setIsGuest(true);
-      setGuestTrialEnd(parseInt(storedTrial, 10));
-    }
-  }, []);
+    const init = async () => {
+      try {
+        // Check Supabase session
+        const { data } = await supabase.auth.getSession();
+        const activeSession = data?.session;
 
-  // Watch for trial expiration
-  useEffect(() => {
-    if (!isGuest || !guestTrialEnd) return;
+        setSession(activeSession);
+        setUser(activeSession?.user ?? null);
 
-    const now = Date.now();
-    if (now >= guestTrialEnd) {
-      disableGuestMode(); // auto-expire
-    }
-  }, [isGuest, guestTrialEnd]);
+        // Check Guest Mode
+        const isGuestStored = localStorage.getItem("faceup_guest_mode") === "true";
+        if (!activeSession && isGuestStored) {
+          setIsGuest(true);
+        }
 
-  // Supabase session listener
-  useEffect(() => {
+        // Load user role from DB if logged in
+        if (activeSession?.user) {
+          await loadUserRole(activeSession.user.id);
+        }
+
+        setLoading(false);
+      } catch (err) {
+        console.error("Session init failed:", err);
+        setLoading(false);
+      }
+    };
+
+    init();
+
+    // Listen for auth changes
     const { data: listener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        setUser(session?.user || null);
+      async (event, newSession) => {
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+
+        if (event === "SIGNED_IN") {
+          localStorage.removeItem("faceup_guest_mode");
+          setIsGuest(false);
+          if (newSession?.user) {
+            await loadUserRole(newSession.user.id);
+          }
+        }
+
+        if (event === "SIGNED_OUT") {
+          setUser(null);
+          setUserRole("free");
+        }
       }
     );
-
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setUser(data.session?.user || null);
-    });
 
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  // Enable guest trial
-  const enableGuestMode = () => {
-    const expiry = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
+  // ─────────────────────────────────────────────
+  // LOAD USER ROLE FROM SUPABASE
+  // ─────────────────────────────────────────────
+  const loadUserRole = async (userId) => {
+    try {
+      const { data, error } = await supabase
+        .from("user_profiles")
+        .select("role")
+        .eq("id", userId)
+        .single();
 
-    setIsGuest(true);
-    setGuestTrialEnd(expiry);
-
-    localStorage.setItem("faceup_guest_mode", "true");
-    localStorage.setItem("faceup_trial_end", expiry.toString());
+      if (error || !data) {
+        setUserRole("free");
+      } else {
+        setUserRole(data.role ?? "free");
+      }
+    } catch (err) {
+      console.error("Role fetch failed:", err);
+      setUserRole("free");
+    }
   };
 
-  // Disable guest mode → becomes free tier
+  // ─────────────────────────────────────────────
+  // GUEST MODE CONTROLS
+  // ─────────────────────────────────────────────
+  const enableGuestMode = () => {
+    setIsGuest(true);
+    localStorage.setItem("faceup_guest_mode", "true");
+  };
+
   const disableGuestMode = () => {
     setIsGuest(false);
-    setGuestTrialEnd(null);
     localStorage.removeItem("faceup_guest_mode");
-    localStorage.removeItem("faceup_trial_end");
+    localStorage.removeItem("faceup_guest_demo");
   };
 
+  // ─────────────────────────────────────────────
+  // SIGN OUT
+  // ─────────────────────────────────────────────
   const signOut = async () => {
-    await supabase.auth.signOut();
-    disableGuestMode();
+    try {
+      await supabase.auth.signOut();
+      disableGuestMode();
+    } catch (err) {
+      console.error("Signout error:", err);
+    }
   };
 
   return (
@@ -78,11 +126,23 @@ export const SessionProvider = ({ children }) => {
       value={{
         session,
         user,
+        loading,
+
+        // Guest
         isGuest,
-        guestTrialEnd,
         enableGuestMode,
         disableGuestMode,
+
+        // Roles
+        userRole,
+        setUserRole,
+
+        // Auth
         signOut,
+
+        // Derived states
+        isAuthenticated: !!session || isGuest,
+        isFullyAuthenticated: !!session,
       }}
     >
       {children}
