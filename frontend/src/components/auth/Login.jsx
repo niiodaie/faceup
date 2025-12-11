@@ -432,21 +432,21 @@ const Login = ({ onGuestDemo }) => {
 </Button>
 
 {/* Sign Up footer */}
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              Don't have an account?{' '}
-              <Link
-                to="/signup"
-                className="text-purple-600 hover:text-purple-800 hover:underline font-medium"
-              >
-                Sign Up
-              </Link>
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
+<div className="mt-6 text-center">
+  <p className="text-gray-600">
+    Don't have an account?{' '}
+    <Link
+      to="/signup"
+      className="text-purple-600 hover:text-purple-800 hover:underline font-medium"
+    >
+      Sign Up
+    </Link>
+  </p>
+</div>
+</CardContent>
+</Card>
+</div>
+);
 };
 
 export default Login;
