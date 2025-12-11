@@ -1,15 +1,11 @@
 {
   "rewrites": [
     {
-      "source": "/app/(.*)",
+      "source": "/app/:path*",
       "destination": "/index.html"
     },
     {
-      "source": "/auth/(.*)",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/(.*)",
+      "source": "/auth/:path*",
       "destination": "/index.html"
     }
   ],
