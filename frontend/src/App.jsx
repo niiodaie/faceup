@@ -14,6 +14,11 @@ import AffiliateLinks from './components/AffiliateLinks';
 import SocialShare from './components/SocialShare';
 import NotFound from './components/NotFound';
 import FaceScanPage from './FaceScanPage';
+import PricingPage from './pages/pricing';
+import Dashboard from './pages/dashboard';
+import ScanPage from './pages/scan';
+import ResultsPage from './pages/results';
+import GoogleAnalytics from './components/GoogleAnalytics';
 import ProtectedRoute, { AuthenticatedRoute, GuestAllowedRoute, PublicRoute } from './components/ProtectedRoute';
 
 // New authentication components
@@ -113,7 +118,9 @@ function AppContent() {
   }
 
   return (
-    <Routes>
+    <>
+      <GoogleAnalytics />
+      <Routes>
       {/* Public Routes */}
       <Route
         path="/"
@@ -311,9 +318,46 @@ function AppContent() {
         }
       />
       
+      <Route
+        path="/pricing"
+        element={
+          <GuestAllowedRoute>
+            <PricingPage />
+          </GuestAllowedRoute>
+        }
+      />
+      
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      
+      <Route
+        path="/scan"
+        element={
+          <GuestAllowedRoute>
+            <ScanPage />
+          </GuestAllowedRoute>
+        }
+      />
+      
+      <Route
+        path="/results/:sessionId"
+        element={
+          <GuestAllowedRoute>
+            <ResultsPage />
+          </GuestAllowedRoute>
+        }
+      />
+      
       {/* Catch all route */}
       <Route path="*" element={<NotFound />} />
     </Routes>
+    </>
   );
 }
 
