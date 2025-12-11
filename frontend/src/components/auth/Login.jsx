@@ -421,7 +421,7 @@ const Login = ({ onGuestDemo }) => {
               Continue with Google
             </Button>
 
-            {/* Guest Demo Button */}
+           {/* Guest Demo Button */}
 <Button
   onClick={onGuestDemo}
   variant="outline"
@@ -443,12 +443,11 @@ const Login = ({ onGuestDemo }) => {
     </Link>
   </p>
 </div>
+
+</CardContent>
+</Card>
+</div>
 );
-        </CardContent>
-      </Card>
-    </div>
-  );
 };
 
 export default Login;
-
