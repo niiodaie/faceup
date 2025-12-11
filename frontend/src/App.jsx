@@ -1,45 +1,34 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { SessionProvider } from './hooks/useSession.jsx';
-import './App.css';
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import { SessionProvider } from "./hooks/useSession.jsx";
 
-// Route Shells
-import LandingPage from './routes/LandingPage';
-import AppShell from './routes/AppShell';
-import AuthShell from './routes/AuthShell';
+// ROUTE SHELLS
+import LandingPage from "./routes/LandingPage";
+import AppShell from "./routes/AppShell";
+import AuthShell from "./routes/AuthShell";
+import NotFound from "./components/NotFound";
 
-// Components
-import NotFound from './components/NotFound';
-
-/**
- * App - Main application component
- */
 function App() {
   return (
-    <BrowserRouter>
-      <SessionProvider>
-        <Routes>
-          {/* Landing Page */}
-          <Route path="/" element={<LandingPage />} />
+    <SessionProvider>
+      <Routes>
+        {/* Landing Page */}
+        <Route path="/" element={<LandingPage />} />
 
-          {/* App Routes */}
-          <Route path="/app/*" element={<AppShell />} />
+        {/* Application */}
+        <Route path="/app/*" element={<AppShell />} />
 
-          {/* Auth Routes */}
-          <Route path="/auth/*" element={<AuthShell />} />
+        {/* Authentication */}
+        <Route path="/auth/*" element={<AuthShell />} />
 
-          {/* Legacy Compat */}
-          <Route path="/login" element={<AuthShell />} />
-          <Route path="/signup" element={<AuthShell />} />
-          <Route path="/face-scan" element={<AppShell />} />
-          <Route path="/pricing" element={<AppShell />} />
-          <Route path="/dashboard" element={<AppShell />} />
+        {/* Backwards compatibility */}
+        <Route path="/login" element={<AuthShell />} />
+        <Route path="/signup" element={<AuthShell />} />
 
-          {/* Catch-All */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </SessionProvider>
-    </BrowserRouter>
+        {/* 404 */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </SessionProvider>
   );
 }
 
