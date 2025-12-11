@@ -419,8 +419,6 @@ const Login = ({ onGuestDemo }) => {
                 />
               </svg>
               Continue with Google
-            </Button>
-
             <Button
   onClick={onGuestDemo}
   variant="outline"
@@ -429,7 +427,6 @@ const Login = ({ onGuestDemo }) => {
   <Sparkles className="h-5 w-5" />
   Try Guest Demo
 </Button>
-</div>
 
 <div className="mt-6 text-center">
   <p className="text-gray-600">
@@ -442,6 +439,3 @@ const Login = ({ onGuestDemo }) => {
     </Link>
   </p>
 </div>
-
-export default Login;
-
