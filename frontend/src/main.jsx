@@ -1,15 +1,15 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
-import App from "./App.jsx";
 import "./index.css";
+import App from "./App.jsx";
 
+import { BrowserRouter } from "react-router-dom";
 import { initGA, trackPage } from "./lib/analytics";
 
-// Initialize once
+// Initialize Google Analytics once
 initGA();
 
-// Track SPA navigation
+// Listen for SPA pageviews
 function AnalyticsListener() {
   trackPage(window.location.pathname);
 
@@ -17,9 +17,9 @@ function AnalyticsListener() {
     trackPage(window.location.pathname);
   });
 
-  const originalPush = history.pushState;
+  const originalPushState = history.pushState;
   history.pushState = function (...args) {
-    originalPush.apply(this, args);
+    originalPushState.apply(this, args);
     trackPage(window.location.pathname);
   };
 
