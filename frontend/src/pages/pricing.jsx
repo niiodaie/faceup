@@ -69,7 +69,7 @@ const PricingPage = () => {
     if (!priceId) return;
 
     if (isGuest || !user) {
-      navigate('/signup', { state: { returnTo: '/pricing' } });
+      navigate('/auth/signup', { state: { returnTo: '/pricing' } });
       return;
     }
 

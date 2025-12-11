@@ -13,10 +13,15 @@ import AuthCallback from '../pages/auth/callback';
  * Redirects to /app if user is already authenticated
  */
 export default function AuthShell() {
-  const { user, isGuest } = useSession();
+  const { user, isGuest, disableGuestMode } = useSession();
 
-  // If already authenticated or in guest mode, redirect to app
-  if (user || isGuest) {
+  // If in guest mode, disable it when accessing auth routes
+  if (isGuest) {
+    disableGuestMode();
+  }
+
+  // If already authenticated (not guest), redirect to app
+  if (user && !isGuest) {
     return <Navigate to="/app" replace />;
   }
 
