@@ -23,6 +23,7 @@ import PhoneAuth from './components/auth/PhoneAuth';
 import AuthCallback from './pages/auth/callback';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
+import PricingPage from './pages/pricing';
 
 // Session management
 import { SessionProvider, useSession } from './hooks/useSession.jsx';
@@ -307,6 +308,15 @@ function AppContent() {
         element={
           <GuestAllowedRoute>
             <FaceScanPage />
+          </GuestAllowedRoute>
+        }
+      />
+      
+      <Route
+        path="/pricing"
+        element={
+          <GuestAllowedRoute>
+            <PricingPage />
           </GuestAllowedRoute>
         }
       />
