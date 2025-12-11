@@ -422,31 +422,26 @@ const Login = ({ onGuestDemo }) => {
             </Button>
 
             <Button
-              onClick={onGuestDemo}
-              variant="outline"
-              className="w-full py-3 rounded-lg font-bold text-lg border-purple-300 text-purple-600 hover:bg-purple-50 transition-all duration-300 flex items-center justify-center gap-2"
-            >
-              <Sparkles className="h-5 w-5" />
-              Try Guest Demo
-            </Button>
-          </div>
+  onClick={onGuestDemo}
+  variant="outline"
+  className="w-full py-3 rounded-lg font-bold text-lg border-purple-300 text-purple-600 hover:bg-purple-50 transition-all duration-300 flex items-center justify-center gap-2"
+>
+  <Sparkles className="h-5 w-5" />
+  Try Guest Demo
+</Button>
+</div>
 
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              Don't have an account?{' '}
-              <Link
-                to="/signup"
-                className="text-purple-600 hover:text-purple-800 hover:underline font-medium"
-              >
-                Sign Up
-              </Link>
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
+<div className="mt-6 text-center">
+  <p className="text-gray-600">
+    Don't have an account?{' '}
+    <Link
+      to="/signup"
+      className="text-purple-600 hover:text-purple-800 hover:underline font-medium"
+    >
+      Sign Up
+    </Link>
+  </p>
+</div>
 
 export default Login;
 
