@@ -1,49 +1,59 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import { SessionProvider } from './hooks/useSession.jsx';
-import './App.css';
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-// Route Shells
-import LandingPage from './routes/LandingPage';
-import AppShell from './routes/AppShell';
-import AuthShell from './routes/AuthShell';
+import IntroPage from "./components/IntroPage";
+import GuestDemo from "./components/GuestDemo";
 
-// Components
-import NotFound from './components/NotFound';
+// Auth pages
+import SignUp from "./components/auth/SignUp";
+import Login from "./components/auth/Login";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
+import PhoneAuth from "./components/auth/PhoneAuth";
+import AuthCallback from "./pages/auth/callback";
 
-/**
- * App - Main application component
- * Implements clean routing structure:
- * - / = Landing page (IntroPage)
- * - /app/* = Main application
- * - /auth/* = Authentication flows
- * - * = 404 Not Found
- */
-function App() {
+// App pages
+import FaceScanPage from "./FaceScanPage";
+import PricingPage from "./pages/pricing";
+import Dashboard from "./pages/dashboard";
+import ScanPage from "./pages/scan";
+import ResultsPage from "./pages/results";
+
+// Session
+import { SessionProvider } from "./hooks/useSession";
+
+export default function App() {
   return (
-    <SessionProvider>
-      <Routes>
-        {/* Landing Page - Root */}
-        <Route path="/" element={<LandingPage />} />
-        
-        {/* App Routes - /app/* */}
-        <Route path="/app/*" element={<AppShell />} />
-        
-        {/* Auth Routes - /auth/* */}
-        <Route path="/auth/*" element={<AuthShell />} />
-        
-        {/* Legacy routes for backward compatibility */}
-        <Route path="/login" element={<AuthShell />} />
-        <Route path="/signup" element={<AuthShell />} />
-        <Route path="/face-scan" element={<AppShell />} />
-        <Route path="/pricing" element={<AppShell />} />
-        <Route path="/dashboard" element={<AppShell />} />
-        
-        {/* 404 Not Found */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </SessionProvider>
+    <BrowserRouter>
+      <SessionProvider>
+        <Routes>
+
+          {/* PUBLIC LANDING */}
+          <Route path="/" element={<IntroPage />} />
+
+          {/* AUTH ROUTES */}
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+          <Route path="/auth/reset" element={<ResetPassword />} />
+          <Route path="/auth/verify-phone" element={<PhoneAuth />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+
+          {/* GUEST DEMO */}
+          <Route path="/app" element={<GuestDemo />} />
+
+          {/* MAIN APP PAGES */}
+          <Route path="/face-scan" element={<FaceScanPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/scan" element={<ScanPage />} />
+          <Route path="/results/:sessionId" element={<ResultsPage />} />
+
+          {/* CATCH ALL */}
+          <Route path="*" element={<IntroPage />} />
+
+        </Routes>
+      </SessionProvider>
+    </BrowserRouter>
   );
 }
-
-export default App;
