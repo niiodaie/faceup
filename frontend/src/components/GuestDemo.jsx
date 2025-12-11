@@ -86,7 +86,7 @@ const GuestDemo = ({ onSignUp }) => {
   };
 
   const handleFaceScan = () => {
-    navigate('/face-scan');
+    navigate('/app/face-scan');
   };
 
   const getTimeRemaining = () => {
@@ -212,14 +212,14 @@ const GuestDemo = ({ onSignUp }) => {
                   </ul>
                   <div className="grid grid-cols-2 gap-2">
                     <Button
-                      onClick={() => navigate('/signup')}
+                      onClick={() => navigate('/auth/signup')}
                       className="py-2 rounded-lg font-bold bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 transition-all duration-300 flex items-center justify-center gap-1"
                     >
                       <Sparkles className="h-4 w-4" />
                       Sign Up Free
                     </Button>
                     <Button
-                      onClick={() => navigate('/login')}
+                      onClick={() => navigate('/auth/login')}
                       variant="outline"
                       className="py-2 rounded-lg font-bold border-purple-300 text-purple-600 hover:bg-purple-50 transition-all duration-300"
                     >
@@ -245,14 +245,14 @@ const GuestDemo = ({ onSignUp }) => {
           <p className="text-gray-600 mb-4">Ready to unlock your full potential?</p>
           <div className="grid grid-cols-2 gap-3">
             <Button
-              onClick={() => navigate('/signup')}
+              onClick={() => navigate('/auth/signup')}
               className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
             >
               Sign Up Free
             </Button>
             <Button
               variant="outline"
-              onClick={() => navigate('/login')}
+              onClick={() => navigate('/auth/login')}
               className="px-6 py-2 border-purple-300 text-purple-600 hover:bg-purple-50"
             >
               Log In
