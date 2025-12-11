@@ -59,6 +59,7 @@ app.get('/health', (req, res) => {
 
 // Face scan endpoints
 app.post('/face-scan', handleFaceScan);
+app.post('/ai/analyze', handleFaceScan); // Alias for face-scan
 app.get('/scan-status/:sessionId', getScanStatus);
 app.get('/suggestions/:sessionId', getSuggestions);
 

@@ -80,6 +80,12 @@ Please provide recommendations in the following JSON format:
       "confidence": 0.95
     }
   ],
+  "occasionLooks": {
+    "dateNight": "Hairstyle and makeup recommendation for a romantic date",
+    "office": "Professional look for work environment",
+    "party": "Fun and bold look for parties and events",
+    "wedding": "Elegant and sophisticated look for weddings"
+  },
   "generalAdvice": "Overall styling tips for this face shape and features"
 }
 
@@ -112,6 +118,7 @@ function formatSuggestions(suggestions) {
       confidence: suggestion.confidence || 0.85,
       imageUrl: null // Will be populated by Replicate if available
     })),
+    occasionLooks: suggestions.occasionLooks || {},
     generalAdvice: suggestions.generalAdvice,
     generatedAt: new Date().toISOString()
   };
