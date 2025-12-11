@@ -96,7 +96,7 @@ export default function AppShell() {
   if (isGuest) {
     return (
       <Routes>
-        <Route path="/*" element={<GuestDemo onSignUp={() => disableGuestMode()} />} />
+        <Route path="/*" element={<GuestDemo onSignUp={() => enableGuestMode()} />} />
       </Routes>
     );
   }
