@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
+import ErrorBoundary from "./components/ErrorBoundary.jsx";
 
 import { BrowserRouter } from "react-router-dom";
 import { initGA, trackPage } from "./lib/analytics";
@@ -28,9 +29,11 @@ function AnalyticsListener() {
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <BrowserRouter>
-      <AnalyticsListener />
-      <App />
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AnalyticsListener />
+        <App />
+      </BrowserRouter>
+    </ErrorBoundary>
   </StrictMode>
 );
