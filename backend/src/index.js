@@ -20,7 +20,8 @@ import { handleFaceScan, getScanStatus, getSuggestions } from './faceScan.js';
 
 // Stripe
 import { handleStripeWebhook } from './webhooks/stripeWebhook.js';
-import { createCheckoutSession, getSubscriptionStatus } from './routes/stripe.js';
+import { createCheckoutSession, getSubscriptionStatus } from './stripe.js';
+
 
 // Entitlements (Free / Trial / Pro resolution)
 import { resolveEntitlements } from './entitlements.js';
