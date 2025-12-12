@@ -3,35 +3,30 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import multer from 'multer';
 
-
-
-// Core handlers
-import { handleFaceScan, getScanStatus, getSuggestions } from './faceScan.js';
-
-// Stripe (separated responsibilities)
-import { handleStripeWebhook } from './webhooks/stripeWebhook.js';
-import { createCheckoutSession, getSubscriptionStatus } from './routes/stripe.js';
-
-import { resolveEntitlements } from './entitlements.js';
-
-app.get('/entitlements/:userId', async (req, res) => {
-  try {
-    const entitlements = await resolveEntitlements(req.params.userId);
-    res.json(entitlements);
-  } catch (err) {
-    console.error('Entitlement error:', err);
-    res.status(500).json({ error: 'Entitlement resolution failed' });
-  }
-});
-
-
+/* =========================================================
+   ENV
+   ========================================================= */
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 /* =========================================================
-   STRIPE WEBHOOK (MUST BE FIRST — RAW BODY, NO CORS)
+   IMPORTS (AFTER app INIT)
+   ========================================================= */
+
+// Core AI handlers
+import { handleFaceScan, getScanStatus, getSuggestions } from './faceScan.js';
+
+// Stripe
+import { handleStripeWebhook } from './webhooks/stripeWebhook.js';
+import { createCheckoutSession, getSubscriptionStatus } from './routes/stripe.js';
+
+// Entitlements (Free / Trial / Pro resolution)
+import { resolveEntitlements } from './entitlements.js';
+
+/* =========================================================
+   STRIPE WEBHOOK — MUST BE FIRST (RAW BODY)
    ========================================================= */
 app.post(
   '/stripe/webhook',
@@ -40,7 +35,7 @@ app.post(
 );
 
 /* =========================================================
-   CORS CONFIGURATION
+   CORS CONFIG
    ========================================================= */
 const allowedOrigins = [
   'https://www.faceupstyle.com',
@@ -49,22 +44,16 @@ const allowedOrigins = [
   'http://localhost:3000'
 ];
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow server-to-server / mobile / Postman
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.warn('CORS blocked:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true
-};
-
-app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true
+  })
+);
 
 /* =========================================================
    BODY PARSERS (AFTER WEBHOOK)
@@ -77,10 +66,10 @@ app.use(express.urlencoded({ extended: true }));
    ========================================================= */
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
-  fileFilter: (req, file, cb) => {
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (_, file, cb) => {
     if (!file.mimetype.startsWith('image/')) {
-      return cb(new Error('Only image files allowed'), false);
+      return cb(new Error('Only image files allowed'));
     }
     cb(null, true);
   }
@@ -89,20 +78,20 @@ const upload = multer({
 /* =========================================================
    HEALTH CHECK
    ========================================================= */
-app.get('/health', (req, res) => {
+app.get('/health', (_, res) => {
   res.json({
     status: 'ok',
     service: 'FaceUp Backend API',
-    environment: process.env.NODE_ENV || 'development',
+    env: process.env.NODE_ENV || 'development',
     timestamp: new Date().toISOString()
   });
 });
 
 /* =========================================================
-   FACE SCAN ROUTES
+   AI / FACE SCAN ROUTES
    ========================================================= */
 app.post('/face-scan', handleFaceScan);
-app.post('/ai/analyze', handleFaceScan); // alias
+app.post('/ai/analyze', handleFaceScan);
 app.get('/scan-status/:sessionId', getScanStatus);
 app.get('/suggestions/:sessionId', getSuggestions);
 
@@ -111,6 +100,19 @@ app.get('/suggestions/:sessionId', getSuggestions);
    ========================================================= */
 app.post('/stripe/create-checkout', createCheckoutSession);
 app.get('/stripe/subscription/:userId', getSubscriptionStatus);
+
+/* =========================================================
+   ENTITLEMENTS (🔥 PHASE C DEPENDS ON THIS)
+   ========================================================= */
+app.get('/entitlements/:userId', async (req, res) => {
+  try {
+    const entitlements = await resolveEntitlements(req.params.userId);
+    res.json(entitlements);
+  } catch (err) {
+    console.error('Entitlement error:', err);
+    res.status(500).json({ error: 'Entitlement resolution failed' });
+  }
+});
 
 /* =========================================================
    IMAGE UPLOAD
@@ -123,26 +125,24 @@ app.post('/upload-image', upload.single('image'), async (req, res) => {
 
     const { uploadImage } = await import('./supabaseService.js');
 
-    const filename = `${Date.now()}-${req.file.originalname}`;
-    const filePath = `uploads/${filename}`;
+    const filePath = `uploads/${Date.now()}-${req.file.originalname}`;
 
-    const publicUrl = await uploadImage(
+    const imageUrl = await uploadImage(
       'faceup-uploads',
       filePath,
       req.file.buffer,
       req.file.mimetype
     );
 
-    res.json({ success: true, imageUrl: publicUrl });
-
-  } catch (error) {
-    console.error('Upload error:', error);
+    res.json({ success: true, imageUrl });
+  } catch (err) {
+    console.error('Upload error:', err);
     res.status(500).json({ error: 'Upload failed' });
   }
 });
 
 /* =========================================================
-   USER PROFILE
+   PROFILE
    ========================================================= */
 app.get('/profile/:userId', async (req, res) => {
   try {
@@ -156,8 +156,7 @@ app.get('/profile/:userId', async (req, res) => {
 
     if (error) throw error;
     res.json(data);
-
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Profile fetch failed' });
   }
 });
@@ -179,10 +178,8 @@ app.get('/history/:userId', async (req, res) => {
       .range(offset, offset + limit - 1);
 
     if (error) throw error;
-
     res.json({ sessions: data });
-
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'History fetch failed' });
   }
 });
@@ -196,18 +193,13 @@ app.post('/feedback', async (req, res) => {
 
     const { data, error } = await supabase
       .from('feedback')
-      .insert({
-        ...req.body,
-        created_at: new Date().toISOString()
-      })
+      .insert({ ...req.body, created_at: new Date().toISOString() })
       .select()
       .single();
 
     if (error) throw error;
-
     res.json({ success: true, feedback: data });
-
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Feedback failed' });
   }
 });
@@ -215,23 +207,20 @@ app.post('/feedback', async (req, res) => {
 /* =========================================================
    ERROR HANDLING
    ========================================================= */
-app.use((err, req, res, next) => {
+app.use((err, _, res, __) => {
   console.error('Unhandled error:', err);
   res.status(500).json({ error: 'Internal server error' });
 });
 
 /* =========================================================
-   404 HANDLER
+   404
    ========================================================= */
 app.use((req, res) => {
-  res.status(404).json({
-    error: 'Not Found',
-    path: req.path
-  });
+  res.status(404).json({ error: 'Not Found', path: req.path });
 });
 
 /* =========================================================
-   SERVER START
+   START SERVER
    ========================================================= */
 app.listen(PORT, () => {
   console.log(`
