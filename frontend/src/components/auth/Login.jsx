@@ -116,7 +116,6 @@ export default function Login() {
     );
 
     enableGuestMode();
-    window.location.href = "/app"; // hard redirect = Vercel-safe
   };
 
   /* ------------------ UI ------------------ */
