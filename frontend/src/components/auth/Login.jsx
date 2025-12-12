@@ -1,55 +1,64 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { authHelpers } from '../../utils/supabaseClient';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Checkbox } from '../ui/checkbox';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { authHelpers } from "../../utils/supabaseClient";
 import { useSession } from "../../hooks/useSession.jsx";
-import { 
-  Loader2, 
-  Eye, 
-  EyeOff, 
-  Mail, 
-  Phone, 
+
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Checkbox } from "../ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+
+import {
+  Loader2,
+  Eye,
+  EyeOff,
   AlertCircle,
   CheckCircle,
-  Sparkles
-} from 'lucide-react';
+  Sparkles,
+} from "lucide-react";
 
-const Login = ({ onGuestDemo }) => {
+export default function Login() {
   const navigate = useNavigate();
+  const { enableGuestMode } = useSession();
+
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
-  const [activeTab, setActiveTab] = useState('email');
+  const [activeTab, setActiveTab] = useState("email");
   const [magicLinkSent, setMagicLinkSent] = useState(false);
 
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    phone: '',
+    email: "",
+    password: "",
+    phone: "",
   });
 
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
   const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
-  const validatePhone = (phone) => /^\+?[\d\s-()]+$/.test(phone);
 
   const handleInputChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
-    setMessage('');
+    setFormData((p) => ({ ...p, [e.target.name]: e.target.value }));
+    setMessage("");
   };
+
+  /* ------------------ LOGIN HANDLERS ------------------ */
 
   const handleEmailLogin = async (e) => {
     e.preventDefault();
-    if (!formData.email || !formData.password) return setMessage('Please fill in all fields');
-    if (!validateEmail(formData.email)) return setMessage('Enter a valid email');
+    if (!validateEmail(formData.email) || !formData.password) {
+      return setMessage("Enter valid credentials");
+    }
 
     setLoading(true);
-
     try {
       const { error } = await authHelpers.signInWithEmail(
         formData.email,
@@ -57,7 +66,7 @@ const Login = ({ onGuestDemo }) => {
         rememberMe
       );
       if (error) return setMessage(error.message);
-      navigate('/app');
+      navigate("/app");
     } finally {
       setLoading(false);
     }
@@ -65,29 +74,18 @@ const Login = ({ onGuestDemo }) => {
 
   const handleMagicLink = async (e) => {
     e.preventDefault();
-    if (!validateEmail(formData.email)) return setMessage('Enter a valid email');
+    if (!validateEmail(formData.email)) {
+      return setMessage("Enter a valid email");
+    }
 
     setLoading(true);
-
     try {
-      const { error } = await authHelpers.signInWithMagicLink(formData.email, rememberMe);
+      const { error } = await authHelpers.signInWithMagicLink(
+        formData.email,
+        rememberMe
+      );
       if (error) return setMessage(error.message);
       setMagicLinkSent(true);
-      setMessage('Magic link sent! Check your email.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePhoneLogin = async (e) => {
-    e.preventDefault();
-    if (!validatePhone(formData.phone)) return setMessage('Enter a valid phone number');
-
-    setLoading(true);
-    try {
-      const { error } = await authHelpers.signInWithPhone(formData.phone);
-      if (error) return setMessage(error.message);
-      navigate('/auth/verify-phone', { state: { phone: formData.phone } });
     } finally {
       setLoading(false);
     }
@@ -103,215 +101,132 @@ const Login = ({ onGuestDemo }) => {
     }
   };
 
+  /* ------------------ TRIAL (GUEST) HANDLER ------------------ */
+
+  const startTrial = () => {
+    const TRIAL_DAYS = 7;
+    const expiresAt = Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000;
+
+    localStorage.setItem(
+      "faceup_trial",
+      JSON.stringify({
+        active: true,
+        expiresAt,
+      })
+    );
+
+    enableGuestMode();
+    window.location.href = "/app"; // hard redirect = Vercel-safe
+  };
+
+  /* ------------------ UI ------------------ */
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100 p-4">
-
-      {/* Logo + Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-5xl font-extrabold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-pink-400 tracking-wide">
-          Face<span className="italic font-light">Up</span>
-        </h1>
-        <p className="text-gray-600 text-lg font-medium">Be Seen. Be Styled. Be You.</p>
-      </div>
-
-      {/* Card Wrapper */}
-      <Card className="w-full max-w-md p-6 shadow-lg rounded-xl bg-white/90 backdrop-blur-md">
-
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100 p-4">
+      <Card className="w-full max-w-md p-6 bg-white/90 backdrop-blur shadow-xl">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold gradient-text mb-2">Welcome Back</CardTitle>
-          <CardDescription className="text-gray-600">
+          <CardTitle className="text-3xl font-bold">Welcome Back</CardTitle>
+          <CardDescription>
             Sign in to continue your style journey
           </CardDescription>
         </CardHeader>
 
         <CardContent>
-
-          {/* Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid grid-cols-3">
               <TabsTrigger value="email">Email</TabsTrigger>
-              <TabsTrigger value="magic">Magic Link</TabsTrigger>
+              <TabsTrigger value="magic">Magic</TabsTrigger>
               <TabsTrigger value="phone">Phone</TabsTrigger>
             </TabsList>
 
-            {/* Email Login */}
-            <TabsContent value="email" className="space-y-4 mt-6">
+            <TabsContent value="email" className="mt-6 space-y-4">
               <form onSubmit={handleEmailLogin} className="space-y-4">
                 <Input
-                  type="email"
                   name="email"
-                  placeholder="Your email"
+                  placeholder="Email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  required
                 />
 
                 <div className="relative">
                   <Input
-                    type={showPassword ? 'text' : 'password'}
                     name="password"
-                    placeholder="Your password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
                     value={formData.password}
                     onChange={handleInputChange}
-                    required
                     className="pr-10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    className="absolute right-3 top-1/2 -translate-y-1/2"
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? <EyeOff /> : <Eye />}
                   </button>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="remember"
-                      checked={rememberMe}
-                      onCheckedChange={setRememberMe}
-                    />
-                    <label htmlFor="remember" className="text-sm text-gray-600">Remember me</label>
-                  </div>
-
-                  <Link
-                    to="/auth/forgot-password"
-                    className="text-sm text-purple-600 hover:text-purple-800 underline"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
-
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-3 font-bold bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing In...
-                    </>
-                  ) : 'Sign In'}
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? <Loader2 className="animate-spin" /> : "Sign In"}
                 </Button>
               </form>
             </TabsContent>
 
-            {/* Magic Link */}
-            <TabsContent value="magic" className="space-y-4 mt-6">
+            <TabsContent value="magic" className="mt-6 space-y-4">
               {magicLinkSent ? (
-                <div className="text-center space-y-4">
-                  <CheckCircle className="h-10 w-10 text-purple-600 mx-auto" />
-                  <p>Magic link sent to {formData.email}</p>
-                  <Button
-                    variant="outline"
-                    onClick={() => setMagicLinkSent(false)}
-                    className="w-full"
-                  >
-                    Send Again
-                  </Button>
+                <div className="text-center space-y-2">
+                  <CheckCircle className="mx-auto text-purple-600" />
+                  <p>Check your email for the magic link</p>
                 </div>
               ) : (
                 <form onSubmit={handleMagicLink} className="space-y-4">
                   <Input
-                    type="email"
                     name="email"
-                    placeholder="Your email"
+                    placeholder="Email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    required
                   />
-
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-3 bg-purple-500 text-white rounded-lg"
-                  >
-                    {loading ? 'Sending...' : 'Send Magic Link'}
-                  </Button>
+                  <Button className="w-full">Send Magic Link</Button>
                 </form>
               )}
             </TabsContent>
-
-            {/* Phone Login */}
-            <TabsContent value="phone" className="space-y-4 mt-6">
-              <form onSubmit={handlePhoneLogin} className="space-y-4">
-                <Input
-                  type="tel"
-                  name="phone"
-                  placeholder="+1 (555) 123-4567"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  required
-                />
-
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-3 bg-indigo-500 text-white rounded-lg"
-                >
-                  {loading ? 'Sending OTP...' : 'Send OTP'}
-                </Button>
-              </form>
-            </TabsContent>
           </Tabs>
 
-          {/* Error Message */}
           {message && (
             <Alert className="mt-4 border-red-500">
-              <AlertCircle className="h-4 w-4" />
+              <AlertCircle />
               <AlertDescription>{message}</AlertDescription>
             </Alert>
           )}
 
-          {/* Divider */}
-          <div className="mt-6 relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">or</span>
-          </div>
-
-          {/* Google Login */}
           <Button
             onClick={handleGoogleLogin}
             variant="outline"
-            disabled={loading}
-            className="w-full mt-4 flex items-center justify-center gap-2 border-red-300 text-red-600"
+            className="w-full mt-4"
           >
             Continue with Google
           </Button>
 
-          {/* Guest Demo Button */}
-<Button
-  onClick={() => {
-    enableGuestMode();              // activate guest
-    localStorage.setItem("faceup_guest_mode", "true");
-    window.location.href = "/app";  // force route (works on Vercel SPA)
-  }}
-  variant="outline"
-  className="w-full py-3 rounded-lg font-bold text-lg border-purple-300 text-purple-600 hover:bg-purple-50 transition-all duration-300 flex items-center justify-center gap-2"
->
-  <Sparkles className="h-5 w-5" />
-  Try Guest Demo
-</Button>
+          {/* ⭐ TRIAL BUTTON */}
+          <Button
+            onClick={startTrial}
+            variant="outline"
+            className="w-full mt-4 border-purple-300 text-purple-600 font-bold"
+          >
+            <Sparkles className="mr-2" />
+            Start 7-Day Free Trial
+          </Button>
 
-{/* Sign Up footer */}
-<div className="mt-6 text-center">
-  <p className="text-gray-600">
-    Don't have an account?{' '}
-    <Link
-      to="/auth/signup"
-      className="text-purple-600 hover:text-purple-800 hover:underline font-medium"
-    >
-      Sign Up
-    </Link>
-  </p>
-</div>
-
-
+          <div className="mt-6 text-center">
+            <p>
+              Don’t have an account?{" "}
+              <Link to="/auth/signup" className="text-purple-600 underline">
+                Sign Up
+              </Link>
+            </p>
+          </div>
         </CardContent>
       </Card>
-
     </div>
   );
-};
-
-export default Login;
+}
