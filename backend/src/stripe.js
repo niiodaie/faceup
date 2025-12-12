@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
 import dotenv from 'dotenv';
-import { getUserSubscription } from '../supabaseService.js';
+import { getUserSubscription } from './supabaseService.js';
 
 dotenv.config();
 
