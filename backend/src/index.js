@@ -10,6 +10,19 @@ import { handleFaceScan, getScanStatus, getSuggestions } from './faceScan.js';
 import { handleStripeWebhook } from './webhooks/stripeWebhook.js';
 import { createCheckoutSession, getSubscriptionStatus } from './routes/stripe.js';
 
+import { resolveEntitlements } from './entitlements.js';
+
+app.get('/entitlements/:userId', async (req, res) => {
+  try {
+    const entitlements = await resolveEntitlements(req.params.userId);
+    res.json(entitlements);
+  } catch (err) {
+    console.error('Entitlement error:', err);
+    res.status(500).json({ error: 'Entitlement resolution failed' });
+  }
+});
+
+
 dotenv.config();
 
 const app = express();
