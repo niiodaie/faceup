@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import multer from 'multer';
-
+import { getUserSubscription } from './supabaseService.js';
 /* =========================================================
    ENV
    ========================================================= */
