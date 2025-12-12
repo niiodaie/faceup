@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { Alert, AlertDescription } from '../ui/alert';
 import { Checkbox } from '../ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { useSession } from "../../hooks/useSession.jsx";
 import { 
   Loader2, 
   Eye, 
@@ -280,7 +281,11 @@ const Login = ({ onGuestDemo }) => {
 
           {/* Guest Demo Button */}
 <Button
-  onClick={() => navigate('/app/guest')}
+  onClick={() => {
+    enableGuestMode();              // activate guest
+    localStorage.setItem("faceup_guest_mode", "true");
+    window.location.href = "/app";  // force route (works on Vercel SPA)
+  }}
   variant="outline"
   className="w-full py-3 rounded-lg font-bold text-lg border-purple-300 text-purple-600 hover:bg-purple-50 transition-all duration-300 flex items-center justify-center gap-2"
 >
