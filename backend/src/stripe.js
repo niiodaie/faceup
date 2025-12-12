@@ -22,6 +22,8 @@ export async function createCheckoutSession(req, res) {
       mode: 'subscription',
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
+
+      // 🔐 Trial configuration
       subscription_data: {
         trial_period_days: 7,
         metadata: {
@@ -30,7 +32,16 @@ export async function createCheckoutSession(req, res) {
           access: 'trial'
         }
       },
+
+      // 🔐 Session-level metadata (webhook-safe)
+      metadata: {
+        userId,
+        plan: 'pro',
+        access: 'trial'
+      },
+
       client_reference_id: userId,
+
       success_url: `${process.env.FRONTEND_URL}/app?checkout=success`,
       cancel_url: `${process.env.FRONTEND_URL}/pricing`
     });
@@ -59,10 +70,16 @@ export async function getSubscriptionStatus(req, res) {
       });
     }
 
+    const isTrial =
+      subscription.status === 'trialing' ||
+      (subscription.current_period_end &&
+        new Date(subscription.current_period_end) > new Date() &&
+        subscription.plan_type === 'pro');
+
     res.json({
       plan: subscription.plan_type,
       status: subscription.status,
-      isTrial: subscription.status === 'trialing',
+      isTrial,
       trialEndsAt: subscription.current_period_end
     });
 
