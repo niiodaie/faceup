@@ -24,10 +24,14 @@ export async function createCheckoutSession(req, res) {
       line_items: [{ price: priceId, quantity: 1 }],
       subscription_data: {
         trial_period_days: 7,
-        metadata: { userId }
+        metadata: {
+          userId,
+          plan: 'pro',
+          access: 'trial'
+        }
       },
       client_reference_id: userId,
-      success_url: `${process.env.FRONTEND_URL}/app?success=true`,
+      success_url: `${process.env.FRONTEND_URL}/app?checkout=success`,
       cancel_url: `${process.env.FRONTEND_URL}/pricing`
     });
 
@@ -48,16 +52,22 @@ export async function getSubscriptionStatus(req, res) {
     const subscription = await getUserSubscription(req.params.userId);
 
     if (!subscription) {
-      return res.json({ plan: 'free', status: 'inactive' });
+      return res.json({
+        plan: 'free',
+        status: 'inactive',
+        isTrial: false
+      });
     }
 
     res.json({
       plan: subscription.plan_type,
       status: subscription.status,
+      isTrial: subscription.status === 'trialing',
       trialEndsAt: subscription.current_period_end
     });
 
   } catch (err) {
+    console.error('Status lookup error:', err);
     res.status(500).json({ error: 'Status lookup failed' });
   }
 }
