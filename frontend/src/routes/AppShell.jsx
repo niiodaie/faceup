@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useSession } from '../hooks/useSession.jsx';
-import { useEntitlements } from '../hooks/useEntitlements'; // ✅ SINGLE import
-import { useUserRole, hasAccess } from '../hooks/useUserRole';
+import { useEntitlements } from '../hooks/useEntitlements';
 
 // Components
 import Header from '../components/Header';
@@ -19,7 +18,7 @@ import FaceScanPage from '../FaceScanPage';
 import PricingPage from '../pages/pricing';
 import Dashboard from '../pages/dashboard';
 import ScanPage from '../pages/scan';
-import ResultsPage from '../pages/ResultsPage'; // ✅ consistent casing
+import ResultsPage from '../pages/ResultsPage';
 
 export default function AppShell() {
   const navigate = useNavigate();
@@ -27,17 +26,14 @@ export default function AppShell() {
   const [selectedMoods, setSelectedMoods] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('EN');
-  const [capturedImage, setCapturedImage] = useState(null);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(null);
 
   const {
-    session,
     user,
     loading,
     isGuest,
     guestTrialEnd,
     signOut,
-    enableGuestMode,
     disableGuestMode,
   } = useSession();
 
@@ -55,22 +51,19 @@ export default function AppShell() {
   }, [isGuest, guestTrialEnd, disableGuestMode, navigate]);
 
   /* =====================================================
-   AUTH + ENTITLEMENT GUARDS
-   ===================================================== */
+     AUTH + ENTITLEMENT GUARDS
+     ===================================================== */
+  if (loading || entitlementsLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600" />
+      </div>
+    );
+  }
 
-// 1️⃣ Still loading auth or entitlements → spinner
-if (loading || entitlementsLoading) {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600" />
-    </div>
-  );
-}
-
-// 2️⃣ Not logged in AND not guest → force login
-if (!user && !isGuest) {
-  return <Navigate to="/auth/login" replace />;
-}
+  if (!user && !isGuest) {
+    return <Navigate to="/auth/login" replace />;
+  }
 
   /* =====================================================
      GUEST MODE
@@ -152,7 +145,7 @@ if (!user && !isGuest) {
                   <UpgradePrompt
                     feature={showUpgradePrompt}
                     onClose={() => setShowUpgradePrompt(null)}
-                    onUpgrade={() => navigate('/app/pricing')}
+                    onUpgrade={() => navigate('/pricing')}
                   />
                 )}
 
