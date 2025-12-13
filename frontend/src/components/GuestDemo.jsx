@@ -1,3 +1,26 @@
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "./ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { Alert, AlertDescription } from "./ui/alert";
+import {
+  Camera,
+  Sparkles,
+  User,
+  Clock,
+  Star,
+} from "lucide-react";
+import MoodSelector from "./MoodSelector";
+import CutMatchSuggestions from "./CutMatchSuggestions";
+import { USER_ROLES, hasAccess } from "../hooks/useUserRole";
+import { useSession } from "../hooks/useSession";
+
 export default function GuestDemo({ onSignUp }) {
   const navigate = useNavigate();
   const { guestTrialEnd } = useSession();
@@ -22,27 +45,52 @@ export default function GuestDemo({ onSignUp }) {
         {/* HEADER */}
         <div className="text-center mb-8">
           <h1 className="text-5xl font-bold gradient-text mb-3">FACEUP</h1>
-          <p className="text-gray-600">Be Seen. Be Styled. Be You.</p>
+          <p className="text-gray-600 text-lg font-medium">
+            Be Seen. Be Styled. Be You.
+          </p>
+
+          <div className="mt-2 flex justify-center gap-2">
+            <span className="px-3 py-1 rounded-full text-xs bg-purple-100 text-purple-800">
+              <User className="inline h-3 w-3 mr-1" />
+              GUEST • 7-DAY TRIAL
+            </span>
+            <span className="px-3 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+              <Clock className="inline h-3 w-3 mr-1" />
+              {daysLeft} days left
+            </span>
+          </div>
         </div>
 
-        {/* TRIAL CARD */}
-        <Card className="mb-6">
+        {/* TRIAL INFO */}
+        <Card className="mb-6 bg-white/90 shadow">
           <CardHeader>
-            <CardTitle>Your Free Trial</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5" />
+              Your Free Trial is Active
+            </CardTitle>
           </CardHeader>
           <CardContent>
+            <ul className="text-sm text-gray-600 space-y-1 mb-3">
+              <li>• Unlimited scans</li>
+              <li>• Full hairstyle access</li>
+              <li>• Style analysis</li>
+            </ul>
             <Alert>
               <AlertDescription>
-                Trial ends in {daysLeft} day{daysLeft !== 1 ? 's' : ''}
+                Trial ends in {daysLeft} day{daysLeft !== 1 ? "s" : ""}.
               </AlertDescription>
             </Alert>
           </CardContent>
         </Card>
 
         {/* ACTIONS */}
-        <Card>
-          <CardContent className="space-y-4">
+        <Card className="bg-white/90 shadow">
+          <CardHeader className="text-center">
+            <CardTitle>Try FaceUp</CardTitle>
+            <CardDescription>Explore during your trial</CardDescription>
+          </CardHeader>
 
+          <CardContent className="space-y-4">
             <Button
               onClick={() => setShowDemo(true)}
               className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white"
@@ -52,7 +100,7 @@ export default function GuestDemo({ onSignUp }) {
             </Button>
 
             {showDemo && (
-              <>
+              <div className="space-y-6">
                 <MoodSelector
                   selectedMoods={selectedMoods}
                   onMoodToggle={(m) =>
@@ -68,28 +116,40 @@ export default function GuestDemo({ onSignUp }) {
                   userRole={USER_ROLES.GUEST}
                   hasAccess={hasAccess}
                 />
-              </>
+
+                <div className="bg-purple-50 p-4 rounded-lg border">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Star className="h-4 w-4 text-purple-600" />
+                    <span className="font-semibold">Save Your Looks</span>
+                  </div>
+
+                  <Button
+                    onClick={() => navigate("/auth/signup")}
+                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+                  >
+                    Sign Up Free
+                  </Button>
+                </div>
+              </div>
             )}
-
-            {/* CTA */}
-            <div className="grid grid-cols-2 gap-3 pt-4">
-              <Button
-                onClick={() => navigate('/auth/signup')}
-                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white"
-              >
-                Sign Up Free
-              </Button>
-
-              <Button
-                variant="outline"
-                onClick={() => navigate('/auth/login')}
-              >
-                Log In
-              </Button>
-            </div>
-
           </CardContent>
         </Card>
+
+        {/* FOOTER CTA */}
+        <div className="grid grid-cols-2 gap-3 mt-6">
+          <Button
+            onClick={() => navigate("/auth/signup")}
+            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+          >
+            Sign Up
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate("/auth/login")}
+          >
+            Log In
+          </Button>
+        </div>
 
       </div>
     </div>
