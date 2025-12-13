@@ -1,5 +1,5 @@
 // frontend/src/lib/track.js
-import { trackEvent } from './analytics';
+import { trackEvent } from "./analytics";
 
 /**
  * Generic event tracker
@@ -9,22 +9,22 @@ export function track(event, metadata = {}) {
   try {
     trackEvent(event, metadata);
   } catch (err) {
-    console.warn('[track] failed', err);
+    console.warn("Track failed:", err);
   }
 }
 
 /**
- * Email tracking (Free → Pro retargeting)
+ * Email retargeting events (Free → Pro funnel)
  */
 export async function trackEmailEvent(event, metadata = {}) {
   try {
     await fetch(`${import.meta.env.VITE_API_URL}/track/email`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ event, metadata }),
     });
   } catch (err) {
-    console.warn('[trackEmailEvent] failed', err);
+    console.warn("Email event failed:", err);
   }
 }
