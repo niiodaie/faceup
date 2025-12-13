@@ -37,16 +37,14 @@ export default function GuestDemo({ onSignUp }) {
   const daysLeft = getDaysRemaining();
 
   useEffect(() => {
-    if (daysLeft <= 0) {
-      onSignUp();
-    }
+    if (daysLeft <= 0) onSignUp();
   }, [daysLeft, onSignUp]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100">
       <div className="max-w-md mx-auto px-4 py-8">
 
-        {/* HEADER */}
+        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-5xl font-bold gradient-text mb-3">FACEUP</h1>
           <p className="text-gray-600 text-lg font-medium">
@@ -58,6 +56,7 @@ export default function GuestDemo({ onSignUp }) {
               <User className="inline h-3 w-3 mr-1" />
               GUEST • 7-DAY TRIAL
             </span>
+
             <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
               <Clock className="inline h-3 w-3 mr-1" />
               {daysLeft} days left
@@ -65,7 +64,7 @@ export default function GuestDemo({ onSignUp }) {
           </div>
         </div>
 
-        {/* TRIAL INFO */}
+        {/* Trial Info */}
         <Card className="mb-6 bg-white/90 shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-purple-800">
@@ -73,25 +72,24 @@ export default function GuestDemo({ onSignUp }) {
               Your Free Trial is Active
             </CardTitle>
           </CardHeader>
-
           <CardContent>
-            <ul className="text-sm text-gray-600 space-y-1 mb-4">
+            <ul className="text-sm text-gray-600 space-y-1 mb-3">
               <li>• Unlimited face scans</li>
               <li>• Full hairstyle suggestions</li>
-              <li>• Makeup & styling insights</li>
-              <li>• Save favorite looks</li>
+              <li>• Makeup & style analysis</li>
             </ul>
 
             <Alert className="bg-blue-50 border-blue-300">
+              <Clock className="h-4 w-4" />
               <AlertDescription>
                 Trial ends in {daysLeft} day{daysLeft !== 1 ? "s" : ""}.  
-                Sign up to save your results.
+                Create an account to save your results.
               </AlertDescription>
             </Alert>
           </CardContent>
         </Card>
 
-        {/* ACTIONS */}
+        {/* Demo Actions */}
         <Card className="mb-6 bg-white/90 shadow-lg">
           <CardHeader className="text-center">
             <CardTitle>Try FaceUp Tools</CardTitle>
@@ -114,7 +112,6 @@ export default function GuestDemo({ onSignUp }) {
               onClick={() => navigate("/app/face-scan")}
               className="w-full"
             >
-              <Camera className="h-5 w-5 mr-2" />
               Upload Photo Scan
             </Button>
 
@@ -136,10 +133,10 @@ export default function GuestDemo({ onSignUp }) {
                   hasAccess={hasAccess}
                 />
 
-                <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg">
+                <div className="bg-purple-50 p-4 rounded-lg border">
                   <div className="flex items-center gap-2 mb-2">
                     <Star className="h-4 w-4 text-purple-600" />
-                    <span className="font-semibold">Create Free Account</span>
+                    <span className="font-medium">Create Free Account</span>
                   </div>
 
                   <Button
@@ -154,7 +151,7 @@ export default function GuestDemo({ onSignUp }) {
           </CardContent>
         </Card>
 
-        {/* FOOTER ACTIONS */}
+        {/* Footer CTAs */}
         <div className="grid grid-cols-2 gap-3">
           <Button
             onClick={() => navigate("/auth/signup")}
@@ -170,6 +167,7 @@ export default function GuestDemo({ onSignUp }) {
             Log In
           </Button>
         </div>
+
       </div>
     </div>
   );
