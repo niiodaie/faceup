@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Lock } from 'lucide-react';
 import { useSession } from '../hooks/useSession.jsx';
 import { useEntitlements } from '../hooks/useEntitlements';
-
+import { trackEmailEvent } from '../lib/trackEmailEvent';
 import AdBanner from '../components/AdBanner';
 import BeautyAffiliateBlock from '../components/BeautyAffiliateBlock';
 import SponsoredProLooks from '../components/SponsoredProLooks';
