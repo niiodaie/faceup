@@ -3,8 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Lock } from 'lucide-react';
 import { useSession } from '../hooks/useSession.jsx';
 import { useEntitlements } from '../hooks/useEntitlements';
-import AdBanner from '../components/AdBanner';
 
+import AdBanner from '../components/AdBanner';
+import BeautyAffiliateBlock from '../components/BeautyAffiliateBlock';
+import SponsoredProLooks from '../components/SponsoredProLooks';
 
 const ResultsPage = () => {
   const { sessionId } = useParams();
@@ -29,8 +31,7 @@ const ResultsPage = () => {
         setLoading(true);
         const res = await fetch(`${API_URL}/suggestions/${sessionId}`);
         if (!res.ok) throw new Error('Failed to fetch results');
-        const data = await res.json();
-        setResults(data);
+        setResults(await res.json());
       } catch (err) {
         setError(err.message);
       } finally {
@@ -72,6 +73,9 @@ const ResultsPage = () => {
      ACCESS FLAGS
      ===================================================== */
   const features = entitlements?.features || {};
+  const plan = entitlements?.plan || 'free';
+  const showAds = entitlements?.showAds;
+
   const { faceAnalysis, suggestions, generalAdvice, occasionLooks } = results;
 
   /* =====================================================
@@ -87,92 +91,67 @@ const ResultsPage = () => {
           <p className="text-gray-600 text-lg">AI-powered beauty recommendations</p>
         </div>
 
-        {/* =========================
-    FACE ANALYSIS
-   ========================= */}
-{faceAnalysis && (
-  <div className="bg-white rounded-2xl shadow p-8 mb-6">
-    <h2 className="text-2xl font-bold mb-4">Face Analysis</h2>
-
-    <div className="grid md:grid-cols-2 gap-6">
-      <div className="bg-purple-50 p-6 rounded-xl">
-        <h4 className="font-semibold">Face Shape</h4>
-        <p className="text-2xl">{faceAnalysis.faceShape || 'Oval'}</p>
-      </div>
-
-      <div className="bg-pink-50 p-6 rounded-xl">
-        <h4 className="font-semibold">Skin Tone</h4>
-        <p className="text-2xl">{faceAnalysis.skinTone || 'Warm'}</p>
-      </div>
-    </div>
-  </div>
-)}
-
-{/* FREE PLAN AD — AFTER FACE ANALYSIS */}
-{entitlements?.showAds && (
-  <div className="mb-8">
-    <AdBanner />
-  </div>
-)}
-{/* =========================
-    RECOMMENDED STYLES
-   ========================= */}
-{suggestions?.length > 0 && (
-  <div className="bg-white rounded-2xl shadow p-8 mb-6">
-    <h2 className="text-2xl font-bold mb-6">Recommended Styles</h2>
-
-    {suggestions.map((style, idx) => (
-      <div
-        key={idx}
-        className="border rounded-xl p-6 mb-6 last:mb-0"
-      >
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xl font-bold">{style.name}</h3>
-
-          {/* CONFIDENCE SCORE — C5.2 */}
-          {features.confidenceScore ? (
-            <div className="text-green-600 font-bold text-lg">
-              {Math.round(style.confidence * 100)}%
-            </div>
-          ) : (
-            <div className="relative group">
-              {/* blurred fake score */}
-              <div className="text-gray-400 font-bold text-lg blur-sm select-none">
-                92%
+        {/* FACE ANALYSIS */}
+        {faceAnalysis && (
+          <div className="bg-white rounded-2xl shadow p-8 mb-6">
+            <h2 className="text-2xl font-bold mb-4">Face Analysis</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-purple-50 p-6 rounded-xl">
+                <h4 className="font-semibold">Face Shape</h4>
+                <p className="text-2xl">{faceAnalysis.faceShape || 'Oval'}</p>
               </div>
-
-              {/* hover CTA */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-                <button
-                  onClick={() => navigate('/pricing')}
-                  className="text-xs bg-white px-2 py-1 rounded-full shadow border text-purple-600 font-semibold"
-                >
-                  Unlock Confidence Score
-                </button>
+              <div className="bg-pink-50 p-6 rounded-xl">
+                <h4 className="font-semibold">Skin Tone</h4>
+                <p className="text-2xl">{faceAnalysis.skinTone || 'Warm'}</p>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        <p className="text-gray-700">{style.description}</p>
-      </div>
-    ))}
-  </div>
-)}
+        {/* FREE PLAN AD */}
+        {showAds && <AdBanner />}
 
+        {/* RECOMMENDED STYLES */}
+        {suggestions?.length > 0 && (
+          <div className="bg-white rounded-2xl shadow p-8 mb-6">
+            <h2 className="text-2xl font-bold mb-6">Recommended Styles</h2>
 
-{/* FREE PLAN AD — AFTER STYLES */}
-{entitlements?.showAds && (
-  <div className="mb-10">
-    <AdBanner />
-  </div>
-)}
+            {suggestions.map((style, idx) => (
+              <div key={idx} className="border rounded-xl p-6 mb-6 last:mb-0">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-xl font-bold">{style.name}</h3>
 
+                  {/* C5.2 — Confidence Score Blur */}
+                  {features.confidenceScore ? (
+                    <div className="text-green-600 font-bold text-lg">
+                      {Math.round(style.confidence * 100)}%
+                    </div>
+                  ) : (
+                    <div className="relative group">
+                      <div className="text-gray-400 font-bold blur-sm select-none">
+                        92%
+                      </div>
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                        <button
+                          onClick={() => navigate('/pricing')}
+                          className="text-xs bg-white px-3 py-1 rounded-full shadow border text-purple-600 font-semibold"
+                        >
+                          Unlock Confidence Score
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 <p className="text-gray-700">{style.description}</p>
               </div>
             ))}
           </div>
+        )}
+
+        {/* PRO / TRIAL — SPONSORED LOOKS */}
+        {plan !== 'free' && (
+          <SponsoredProLooks />
         )}
 
         {/* OCCASION LOOKS */}
@@ -199,31 +178,27 @@ const ResultsPage = () => {
         )}
 
         {/* PERSONAL ADVICE */}
-{features.personalAdvice ? (
-  generalAdvice && (
-    <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-8 rounded-2xl shadow mb-6">
-      <h2 className="text-2xl font-bold mb-3">Personal Advice</h2>
-      <p>{generalAdvice}</p>
-    </div>
-  )
-) : (
-  <>
-    <LockedBlock
-      title="Personal Advice Locked"
-      text="Upgrade to Pro for personalized beauty insights."
-      onUpgrade={() => navigate('/pricing')}
-    />
+        {features.personalAdvice ? (
+          generalAdvice && (
+            <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-8 rounded-2xl shadow mb-6">
+              <h2 className="text-2xl font-bold mb-3">Personal Advice</h2>
+              <p>{generalAdvice}</p>
+            </div>
+          )
+        ) : (
+          <>
+            <LockedBlock
+              title="Personal Advice Locked"
+              text="Upgrade to Pro for personalized beauty insights."
+              onUpgrade={() => navigate('/pricing')}
+            />
 
-    {/* 🔥 FREE / TRIAL MONETIZATION — INLINE AFFILIATES */}
-    <BeautyAffiliateBlock
-      moods={selectedMoods}
-      occasion={selectedMoods?.[0]}
-      entitlements={entitlements}
-      placement="results_personal_advice"
-    />
-  </>
-)}
-
+            {/* FREE / TRIAL — AFFILIATE MONETIZATION */}
+            {plan === 'free' && (
+              <BeautyAffiliateBlock placement="results_personal_advice" />
+            )}
+          </>
+        )}
 
         {/* GUEST CTA */}
         {isGuest && (
@@ -243,7 +218,7 @@ const ResultsPage = () => {
 };
 
 /* =====================================================
-   LOCKED BLOCK COMPONENT
+   LOCKED BLOCK
    ===================================================== */
 const LockedBlock = ({ title, text, onUpgrade }) => (
   <div className="bg-white rounded-2xl shadow p-8 mb-8 text-center">
