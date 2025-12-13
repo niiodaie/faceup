@@ -5,9 +5,17 @@ import { getSponsoredLooks } from '../lib/sponsoredLooksEngine';
 import { track } from '../lib/track';
 
 const SponsoredProLooks = ({ moods = [], occasion }) => {
-  const looks = getSponsoredLooks({ moods, occasion });
+  // 🔒 SAFETY: ensure function exists
+  if (typeof getSponsoredLooks !== 'function') {
+    console.warn('[SponsoredProLooks] getSponsoredLooks not available');
+    return null;
+  }
 
-  if (!looks.length) return null;
+  const looks = getSponsoredLooks({ moods, occasion }) || [];
+
+  if (!Array.isArray(looks) || looks.length === 0) {
+    return null;
+  }
 
   return (
     <div className="mb-10">
@@ -18,7 +26,10 @@ const SponsoredProLooks = ({ moods = [], occasion }) => {
 
       <div className="grid md:grid-cols-2 gap-6">
         {looks.map((look) => (
-          <Card key={look.id} className="overflow-hidden rounded-2xl shadow-lg">
+          <Card
+            key={look.id}
+            className="overflow-hidden rounded-2xl shadow-lg"
+          >
             <div className="relative">
               <img
                 src={look.image}
@@ -38,15 +49,20 @@ const SponsoredProLooks = ({ moods = [], occasion }) => {
 
               <button
                 onClick={() => {
-                  track('sponsored_look_click', {
-                    lookId: look.id,
-                    sponsor: look.sponsor,
-                  });
-                  window.open(look.url, '_blank');
+                  try {
+                    track('sponsored_look_click', {
+                      lookId: look.id,
+                      sponsor: look.sponsor,
+                    });
+                  } catch (e) {
+                    console.warn('Track failed', e);
+                  }
+
+                  window.open(look.url, '_blank', 'noopener,noreferrer');
                 }}
                 className="w-full px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold"
               >
-                {look.cta}
+                {look.cta || 'View Look'}
               </button>
             </div>
           </Card>
