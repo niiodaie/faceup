@@ -58,3 +58,18 @@ export const trackScreenshotTaken = () =>
 
 export const trackMenuOpened = (menu) =>
   trackEvent("menu_opened", { menu });
+
+// frontend/src/lib/track.js
+export async function trackEmailEvent(event, metadata = {}) {
+  try {
+    await fetch(`${import.meta.env.VITE_API_URL}/track/email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ event, metadata }),
+    });
+  } catch (err) {
+    console.warn('Email event failed', err);
+  }
+}
+
