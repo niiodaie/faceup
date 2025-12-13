@@ -2,14 +2,15 @@ import React from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Lock, Sparkles } from 'lucide-react';
+import AdBanner from './AdBanner';
 
 const CutMatchSuggestions = ({
   selectedMoods = [],
   entitlements,
 }) => {
-  /**
-   * SAFETY: If entitlements not loaded yet
-   */
+  /* ======================================
+     SAFETY: ENTITLEMENTS NOT READY
+     ====================================== */
   if (!entitlements) {
     return (
       <Card className="p-6 text-center rounded-3xl shadow-md">
@@ -22,12 +23,12 @@ const CutMatchSuggestions = ({
     features = {},
     plan = 'free',
     isTrial = false,
+    showAds = false,
   } = entitlements;
 
-  /**
-   * HARD BLOCK — No suggestions at all
-   * (unlikely, but safe)
-   */
+  /* ======================================
+     HARD BLOCK — NO ACCESS AT ALL
+     ====================================== */
   if (!features.basicSuggestions) {
     return (
       <Card className="p-6 text-center rounded-3xl shadow-lg">
@@ -46,19 +47,19 @@ const CutMatchSuggestions = ({
     );
   }
 
-  /**
-   * BASIC SUGGESTIONS (FREE + ABOVE)
-   */
+  /* ======================================
+     BASIC SUGGESTIONS (FREE + ABOVE)
+     ====================================== */
   const renderBasicSuggestions = () => (
     <div className="space-y-4">
       <div className="text-center">
         <h3 className="text-lg font-semibold">Style Suggestions</h3>
         <p className="text-sm text-gray-600">
-          Based on your mood{selectedMoods.length ? `: ${selectedMoods.join(', ')}` : ''}
+          Based on your mood
+          {selectedMoods.length ? `: ${selectedMoods.join(', ')}` : ''}
         </p>
       </div>
 
-      {/* Placeholder demo suggestions */}
       <div className="grid grid-cols-2 gap-4">
         {['Soft Glam', 'Natural Glow', 'Classic Waves', 'Sleek Bob'].map((style) => (
           <Card
@@ -73,9 +74,9 @@ const CutMatchSuggestions = ({
     </div>
   );
 
-  /**
-   * LOCKED ADVANCED FEATURES (FREE USERS)
-   */
+  /* ======================================
+     UPGRADE BLOCK (FREE USERS)
+     ====================================== */
   const renderUpgradeBlock = () => (
     <Card className="p-4 mt-6 rounded-2xl bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200">
       <div className="flex items-center gap-2 mb-2">
@@ -87,7 +88,7 @@ const CutMatchSuggestions = ({
 
       <ul className="text-sm text-gray-600 mb-4 space-y-1">
         <li>• Advanced AI style matching</li>
-        <li>• Event-based looks (weddings, parties, work)</li>
+        <li>• Event-based looks</li>
         <li>• Makeup + hair combinations</li>
         <li>• Unlimited saved looks</li>
       </ul>
@@ -101,9 +102,9 @@ const CutMatchSuggestions = ({
     </Card>
   );
 
-  /**
-   * PRO / TRIAL — ADVANCED FEATURES
-   */
+  /* ======================================
+     ADVANCED SUGGESTIONS (PRO / TRIAL)
+     ====================================== */
   const renderAdvancedSuggestions = () => (
     <Card className="p-4 mt-6 rounded-2xl shadow-md bg-white/90">
       <div className="flex items-center gap-2 mb-3">
@@ -132,16 +133,32 @@ const CutMatchSuggestions = ({
     </Card>
   );
 
-  /**
-   * RENDER FLOW
-   */
+  /* ======================================
+     FINAL RENDER FLOW (C5)
+     ====================================== */
   return (
     <div className="space-y-6">
+      {/* BASIC (ALL PLANS) */}
       {renderBasicSuggestions()}
 
+      {/* FREE PLAN ADS */}
+      {showAds && (
+        <div className="my-4">
+          <AdBanner />
+        </div>
+      )}
+
+      {/* ADVANCED OR UPGRADE */}
       {features.advancedSuggestions
         ? renderAdvancedSuggestions()
         : renderUpgradeBlock()}
+
+      {/* FREE PLAN ADS — SECOND SLOT */}
+      {showAds && (
+        <div className="mt-6">
+          <AdBanner />
+        </div>
+      )}
     </div>
   );
 };
