@@ -55,19 +55,22 @@ export default function AppShell() {
   }, [isGuest, guestTrialEnd, disableGuestMode, navigate]);
 
   /* =====================================================
-     AUTH GUARDS
-     ===================================================== */
-  if (!loading && !user && !isGuest) {
-    return <Navigate to="/auth/login" replace />;
-  }
+   AUTH + ENTITLEMENT GUARDS
+   ===================================================== */
 
-  if (loading || entitlementsLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600" />
-      </div>
-    );
-  }
+// 1️⃣ Still loading auth or entitlements → spinner
+if (loading || entitlementsLoading) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600" />
+    </div>
+  );
+}
+
+// 2️⃣ Not logged in AND not guest → force login
+if (!user && !isGuest) {
+  return <Navigate to="/auth/login" replace />;
+}
 
   /* =====================================================
      GUEST MODE
