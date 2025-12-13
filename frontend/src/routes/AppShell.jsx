@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useSession } from '../hooks/useSession.jsx';
-import { useUserRole, hasAccess } from '../hooks/useUserRole';
 import { useEntitlements } from '../hooks/useEntitlements';
-
 
 // Components
 import Header from '../components/Header';
@@ -40,24 +38,24 @@ export default function AppShell() {
     loading,
     isGuest,
     guestTrialEnd,
-    userRole,
     signOut,
-    enableGuestMode,
     disableGuestMode,
   } = useSession();
+
+  const {
+    entitlements,
+    loading: entitlementsLoading,
+  } = useEntitlements();
 
   /**
    * AUTO-EXPIRE GUEST TRIAL
    */
   useEffect(() => {
-    if (isGuest && guestTrialEnd) {
-      const now = Date.now();
-      if (now >= guestTrialEnd) {
-        disableGuestMode();
-        navigate('/auth/signup');
-      }
+    if (isGuest && guestTrialEnd && Date.now() >= guestTrialEnd) {
+      disableGuestMode();
+      navigate('/auth/signup');
     }
-  }, [isGuest, guestTrialEnd]);
+  }, [isGuest, guestTrialEnd, disableGuestMode, navigate]);
 
   /**
    * Require Login if no session & not guest
@@ -67,21 +65,18 @@ export default function AppShell() {
   }
 
   /**
-   * Show Loading Screen While Checking Auth
+   * Loading State
    */
-  if (loading) {
+  if (loading || entitlementsLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        Loading…
       </div>
     );
   }
 
   /**
-   * GUEST MODE EXPERIENCE — FULL ACCESS TRIAL
+   * GUEST MODE EXPERIENCE
    */
   if (isGuest) {
     return (
@@ -102,14 +97,12 @@ export default function AppShell() {
   }
 
   /**
-   * NORMAL AUTHENTICATED USERS
+   * Handlers
    */
-  const handleFaceScan = async (imageFile) => {
+  const handleFaceScan = async () => {
     setIsScanning(true);
     try {
-      console.log('Scanning face…', imageFile);
-    } catch (error) {
-      console.error('Face scan error:', error);
+      console.log('Scanning face…');
     } finally {
       setIsScanning(false);
     }
@@ -135,12 +128,11 @@ export default function AppShell() {
   };
 
   /**
-   * APP UI FOR LOGGED-IN USERS
+   * AUTHENTICATED UI
    */
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100">
       <Routes>
-        {/* Dashboard */}
         <Route
           path="/"
           element={
@@ -150,33 +142,18 @@ export default function AppShell() {
                 currentLanguage={currentLanguage}
                 session={session}
                 user={user}
-                userRole={userRole}
                 onLogout={handleLogout}
               />
 
               <main className="px-4 pb-8">
                 <div className="main-card-wrapper p-6 mx-2 mb-8">
                   <div className="text-center mb-8">
-                    <h1 className="text-5xl font-bold gradient-text mb-3">FACEUP</h1>
+                    <h1 className="text-5xl font-bold gradient-text mb-3">
+                      FACEUP
+                    </h1>
                     <p className="text-gray-600 text-lg font-medium">
                       Be Seen. Be Styled. Be You.
                     </p>
-
-                    {userRole && (
-                      <div className="mt-2">
-                        <span
-                          className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                            userRole === 'pro'
-                              ? 'bg-purple-100 text-purple-800'
-                              : userRole === 'free'
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-gray-100 text-gray-800'
-                          }`}
-                        >
-                          {userRole.toUpperCase()} USER
-                        </span>
-                      </div>
-                    )}
                   </div>
 
                   <div className="space-y-8">
@@ -184,8 +161,7 @@ export default function AppShell() {
                       onFaceScan={handleFaceScan}
                       onCapture={handleCaptureImage}
                       isScanning={isScanning}
-                      userRole={userRole}
-                      hasAccess={hasAccess}
+                      entitlements={entitlements}
                     />
 
                     {capturedImage && (
@@ -207,9 +183,8 @@ export default function AppShell() {
                     />
 
                     <CutMatchSuggestions
-                      userRole={userRole}
-                      hasAccess={hasAccess}
                       selectedMoods={selectedMoods}
+                      entitlements={entitlements}
                     />
 
                     {showUpgradePrompt && (
@@ -225,32 +200,16 @@ export default function AppShell() {
                   </div>
                 </div>
               </main>
-
-              <a
-                href="https://visnec.ai"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="fixed bottom-4 right-4 z-50 group"
-                title="Powered by VNX"
-              >
-                <img
-                  src="/vnx-icon.png"
-                  alt="VNX"
-                  className="w-8 h-8 opacity-50 hover:opacity-100 transition-all duration-300 group-hover:scale-110 drop-shadow-lg"
-                />
-              </a>
             </div>
           }
         />
 
-        {/* Sub Pages */}
         <Route path="/scan" element={<ScanPage />} />
         <Route path="/face-scan" element={<FaceScanPage />} />
         <Route path="/results/:sessionId" element={<ResultsPage />} />
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
 
-        {/* Catch all */}
         <Route path="*" element={<Navigate to="/app" replace />} />
       </Routes>
     </div>
