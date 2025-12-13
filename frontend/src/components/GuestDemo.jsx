@@ -174,43 +174,26 @@ export default function GuestDemo({ onSignUp }) {
                     Save your looks and continue after trial expires.
                   </p>
 
-                  <Button
-                    onClick={() => navigate("/auth/signup")}
-                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-2 rounded-lg"
-                  >
-                    Sign Up Free
-                  </Button>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  {/* Bottom Links */}
+<div className="text-center">
+  <p className="text-gray-600 mb-4">
+    Want to keep your style history?
+  </p>
 
-        {/* Bottom Links */}
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">
-            Want to keep your style history?
-          </p>
-          <div className="grid grid-cols-2 gap-3">
-            <Button
-  onClick={() => navigate('/auth/signup')}
-  className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg"
->
-  Start 7-Day Free Trial
-</Button>
+  <div className="grid grid-cols-2 gap-3">
+    <Button
+      onClick={() => navigate('/auth/signup')}
+      className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg"
+    >
+      Sign Up Free
+    </Button>
 
-              Sign Up Free
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate("/auth/login")}
-              className="px-6 py-2 border-purple-300 text-purple-600 hover:bg-purple-50"
-            >
-              Log In
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+    <Button
+      variant="outline"
+      onClick={() => navigate('/auth/login')}
+      className="px-6 py-2 border-purple-300 text-purple-600 hover:bg-purple-50"
+    >
+      Log In
+    </Button>
+  </div>
+</div>
