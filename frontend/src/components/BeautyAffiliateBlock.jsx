@@ -1,84 +1,67 @@
 import React from 'react';
-import { Card } from './ui/card';
-import { Button } from './ui/button';
-import { ExternalLink, Star } from 'lucide-react';
-import { AFFILIATES } from '../config/affiliateConfig';
-import { resolveBeautyProducts } from '../utils/resolveBeautyProducts';
+import { ExternalLink, Sparkles } from 'lucide-react';
 
+/**
+ * BeautyAffiliateBlock
+ * Monetizes FREE + TRIAL users with contextual beauty products
+ */
 const BeautyAffiliateBlock = ({
   moods = [],
   occasion,
   entitlements,
+  placement = 'results',
 }) => {
-  // 🔒 Pro users NEVER see ads
+  // Pro users see NO ads
   if (entitlements?.plan === 'pro') return null;
 
-  const products = resolveBeautyProducts({
-    moods,
-    occasion,
-    sponsored: false,
-  });
+  const products = getProductsForContext(moods, occasion);
 
-  const buildLink = (product) => {
-    const retailer = AFFILIATES[product.retailer];
-    return `${retailer.baseUrl}${product.affiliateId}?tag=${retailer.tag}`;
-  };
-
-  const trackClick = (product) => {
-    // 🔁 GA / Meta stub
-    window.dispatchEvent(
-      new CustomEvent('affiliate_click', {
-        detail: {
-          productId: product.id,
-          retailer: product.retailer,
-        },
-      })
-    );
-  };
+  if (!products.length) return null;
 
   return (
-    <Card className="p-6 rounded-3xl bg-white/90 shadow-md">
-      <h3 className="text-lg font-semibold mb-4 text-center">
-        💄 Beauty Picks for You
-      </h3>
+    <div className="bg-white rounded-2xl shadow p-6 mb-8">
+      <div className="flex items-center gap-2 mb-4">
+        <Sparkles className="h-5 w-5 text-pink-600" />
+        <h3 className="font-bold text-lg">
+          Recommended Beauty Picks
+        </h3>
+      </div>
 
-      <div className="space-y-4">
-        {products.map((product) => (
-          <div
-            key={product.id}
-            className="flex items-center justify-between border rounded-xl p-4"
+      <p className="text-sm text-gray-600 mb-5">
+        Products that match your look & occasion
+      </p>
+
+      <div className="grid grid-cols-2 gap-4">
+        {products.map((p) => (
+          <a
+            key={p.id}
+            href={p.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackAffiliateClick(p, placement)}
+            className="border rounded-xl p-3 hover:shadow-md transition group"
           >
-            <div>
-              <p className="font-semibold">{product.name}</p>
-              <p className="text-sm text-gray-500">
-                {product.brand} • {product.price}
-              </p>
+            <div className="h-24 bg-pink-100 rounded-lg mb-2" />
 
-              {product.sponsored && (
-                <span className="inline-flex items-center gap-1 text-xs text-purple-600 mt-1">
-                  <Star className="h-3 w-3" /> Sponsored
-                </span>
-              )}
+            <p className="text-sm font-semibold mb-1 group-hover:text-pink-600">
+              {p.name}
+            </p>
+
+            <p className="text-xs text-gray-500 mb-2">
+              {p.brand}
+            </p>
+
+            <div className="flex items-center text-xs text-purple-600 font-semibold">
+              Shop Now <ExternalLink className="h-3 w-3 ml-1" />
             </div>
-
-            <Button
-              size="sm"
-              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white"
-              onClick={() => {
-                trackClick(product);
-                window.open(buildLink(product), '_blank');
-              }}
-            >
-              Shop <ExternalLink className="ml-1 h-4 w-4" />
-            </Button>
-          </div>
+          </a>
         ))}
       </div>
 
-      <p className="text-xs text-gray-400 mt-4 text-center">
-        Affiliate links support FaceUp 💜
+      <p className="text-[11px] text-gray-400 mt-4">
+        Affiliate links help support FaceUp 💜
       </p>
-    </Card>
+    </div>
   );
 };
 
