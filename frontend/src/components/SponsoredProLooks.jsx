@@ -2,7 +2,7 @@ import React from 'react';
 import { Card } from './ui/card';
 import { Sparkles } from 'lucide-react';
 import { getSponsoredLooks } from '../lib/sponsoredLooksEngine';
-import { trackEvent } from '../lib/track';
++ import { track } from '../lib/track';
 
 const SponsoredProLooks = ({ moods = [], occasion }) => {
   if (typeof getSponsoredLooks !== 'function') return null;
