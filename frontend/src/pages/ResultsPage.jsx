@@ -157,7 +157,7 @@ const ResultsPage = () => {
         )}
 
         {/* PRO / TRIAL SPONSORED LOOKS */}
-        {plan !== 'free' && <SponsoredProLooks />}
+        {plan !== 'free' && <SponsoredProLooks moods={results?.moods || []} occasion={results?.occasion || ''} />}
 
         {/* PERSONAL ADVICE */}
         {features.personalAdvice ? (
