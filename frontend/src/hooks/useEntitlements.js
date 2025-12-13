@@ -1,20 +1,20 @@
 import { useEffect, useState } from 'react';
-import { useSession } from './useSession';
 
-export function useEntitlements() {
-  const { user } = useSession();
-  const [data, setData] = useState(null);
+export function useEntitlements(user) {
+  const [entitlements, setEntitlements] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) {
-      setData({ plan: 'guest' });
-      return;
+    async function load() {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/entitlements/${user?.id || ''}`
+      );
+      const data = await res.json();
+      setEntitlements(data);
+      setLoading(false);
     }
-
-    fetch(`/entitlements/${user.id}`)
-      .then(res => res.json())
-      .then(setData);
+    load();
   }, [user]);
 
-  return data;
+  return { entitlements, loading };
 }
