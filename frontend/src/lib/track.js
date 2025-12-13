@@ -1,84 +1,29 @@
 import { trackEvent } from "./analytics";
 
-/** FaceUp Event Tracking — full SaaS analytics **/
-
-// ---------- Scan Funnel ----------
-export const trackScanStarted = () =>
-  trackEvent("scan_started");
-
-export const trackScanCompleted = (duration) =>
-  trackEvent("scan_completed", { duration });
-
-export const trackScanFailed = (reason) =>
-  trackEvent("scan_failed", { reason });
-
-
-// ---------- Hairstyle / Beauty Interaction ----------
-export const trackHairstyleSuggestionViewed = (styleName) =>
-  trackEvent("hairstyle_viewed", { style: styleName });
-
-export const trackBeforeAfterOpened = () =>
-  trackEvent("before_after_opened");
-
-
-// ---------- Checkout Funnel ----------
-export const trackPricingViewed = () =>
-  trackEvent("view_pricing");
-
-export const trackUpgradeMonthly = () =>
-  trackEvent("upgrade_click", { plan: "monthly" });
-
-export const trackUpgradeYearly = () =>
-  trackEvent("upgrade_click", { plan: "yearly" });
-
-export const trackStripeCheckoutStarted = (priceId) =>
-  trackEvent("stripe_checkout_started", { priceId });
-
-export const trackStripeCheckoutSuccess = (planType) =>
-  trackEvent("stripe_checkout_success", { plan: planType });
-
-export const trackStripeCheckoutCanceled = () =>
-  trackEvent("stripe_checkout_canceled");
-
-
-// ---------- Subscription Lifecycle ----------
-export const trackSubscriptionActive = (plan) =>
-  trackEvent("subscription_active", { plan });
-
-export const trackSubscriptionCanceled = (plan) =>
-  trackEvent("subscription_canceled", { plan });
-
-
-// ---------- UI Engagement ----------
-export const trackCameraOpened = () =>
-  trackEvent("camera_opened");
-
-export const trackScreenshotTaken = () =>
-  trackEvent("screenshot_taken");
-
-export const trackMenuOpened = (menu) =>
-  trackEvent("menu_opened", { menu });
-
-// frontend/src/lib/track.js
-export async function trackEmailEvent(event, metadata = {}) {
-  try {
-    await fetch(`${import.meta.env.VITE_API_URL}/track/email`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ event, metadata }),
-    });
-  } catch (err) {
-    console.warn('Email event failed', err);
-  }
-}
-
-import { trackEvent } from "./analytics";
-
 /**
  * Generic event tracker
  * Used by ads, sponsored looks, experiments, etc.
  */
 export function track(event, metadata = {}) {
-  trackEvent(event, metadata);
+  try {
+    trackEvent(event, metadata);
+  } catch (err) {
+    console.warn("[track] failed", err);
+  }
+}
+
+/**
+ * Email retargeting tracker (Free → Pro)
+ */
+export async function trackEmailEvent(event, metadata = {}) {
+  try {
+    await fetch(`${import.meta.env.VITE_API_URL}/track/email`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ event, metadata }),
+    });
+  } catch (err) {
+    console.warn("[trackEmailEvent] failed", err);
+  }
 }
