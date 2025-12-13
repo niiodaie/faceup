@@ -114,7 +114,6 @@ const ResultsPage = () => {
     <AdBanner />
   </div>
 )}
-
 {/* =========================
     RECOMMENDED STYLES
    ========================= */}
@@ -130,14 +129,27 @@ const ResultsPage = () => {
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xl font-bold">{style.name}</h3>
 
+          {/* CONFIDENCE SCORE — C5.2 */}
           {features.confidenceScore ? (
-            <div className="text-green-600 font-bold">
+            <div className="text-green-600 font-bold text-lg">
               {Math.round(style.confidence * 100)}%
             </div>
           ) : (
-            <div className="text-gray-400 flex items-center gap-1 text-sm">
-              <Lock className="h-4 w-4" />
-              Pro
+            <div className="relative group">
+              {/* blurred fake score */}
+              <div className="text-gray-400 font-bold text-lg blur-sm select-none">
+                92%
+              </div>
+
+              {/* hover CTA */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                <button
+                  onClick={() => navigate('/pricing')}
+                  className="text-xs bg-white px-2 py-1 rounded-full shadow border text-purple-600 font-semibold"
+                >
+                  Unlock Confidence Score
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -147,6 +159,7 @@ const ResultsPage = () => {
     ))}
   </div>
 )}
+
 
 {/* FREE PLAN AD — AFTER STYLES */}
 {entitlements?.showAds && (
