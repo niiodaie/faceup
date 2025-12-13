@@ -193,12 +193,12 @@ export default function GuestDemo({ onSignUp }) {
           </p>
           <div className="grid grid-cols-2 gap-3">
             <Button
-              onClick={() => navigate("/auth/signup")}
-              >
-          
-              Start 7-Day Free Trial
-              className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
-            >
+  onClick={() => navigate('/auth/signup')}
+  className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg"
+>
+  Start 7-Day Free Trial
+</Button>
+
               Sign Up Free
             </Button>
             <Button
