@@ -1,3 +1,5 @@
+// Centralized affiliate link builder
+
 const AMAZON_ID = import.meta.env.VITE_AMAZON_AFFILIATE_ID;
 const SEPHORA_ID = import.meta.env.VITE_SEPHORA_AFFILIATE_ID;
 const KOHLS_ID = import.meta.env.VITE_KOHLS_AFFILIATE_ID;
