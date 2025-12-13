@@ -25,6 +25,10 @@ import { createCheckoutSession, getSubscriptionStatus } from './stripe.js';
 // Entitlements (Free / Trial / Pro resolution)
 import { resolveEntitlements } from './entitlements.js';
 
+// Email retargeting / analytics
+import { trackEmail } from './routes/email.js';
+
+
 /* =========================================================
    STRIPE WEBHOOK — MUST BE FIRST (RAW BODY)
    ========================================================= */
@@ -113,6 +117,12 @@ app.get('/entitlements/:userId', async (req, res) => {
     res.status(500).json({ error: 'Entitlement resolution failed' });
   }
 });
+
+/* =========================================================
+   EMAIL RETARGETING / ANALYTICS
+   ========================================================= */
+app.post('/track/email', trackEmail);
+
 
 /* =========================================================
    IMAGE UPLOAD
