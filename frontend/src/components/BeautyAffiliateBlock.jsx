@@ -1,67 +1,83 @@
 import React from 'react';
 import { Card } from './ui/card';
-import { Sparkles, ExternalLink } from 'lucide-react';
+import { Button } from './ui/button';
+import { ExternalLink, Star } from 'lucide-react';
+import { AFFILIATES } from '../config/affiliateConfig';
+import { resolveBeautyProducts } from '../utils/resolveBeautyProducts';
 
-const affiliates = [
-  {
-    brand: 'Fenty Beauty',
-    product: 'Gloss Bomb Universal Lip Luminizer',
-    image: '/affiliates/fenty-gloss.jpg',
-    cta: 'Shop on Sephora',
-    link: 'https://sephora.com?affiliate_id=YOUR_ID',
-  },
-  {
-    brand: 'MAC',
-    product: 'Studio Fix Fluid Foundation',
-    image: '/affiliates/mac-foundation.jpg',
-    cta: 'View on Ulta',
-    link: 'https://ulta.com?affiliate_id=YOUR_ID',
-  },
-  {
-    brand: 'Dyson',
-    product: 'Airwrap Styler',
-    image: '/affiliates/dyson-airwrap.jpg',
-    cta: 'Check Price',
-    link: 'https://amazon.com?tag=YOUR_ID',
-  },
-];
+const BeautyAffiliateBlock = ({
+  moods = [],
+  occasion,
+  entitlements,
+}) => {
+  // 🔒 Pro users NEVER see ads
+  if (entitlements?.plan === 'pro') return null;
 
-const BeautyAffiliateBlock = () => {
-  const item = affiliates[Math.floor(Math.random() * affiliates.length)];
+  const products = resolveBeautyProducts({
+    moods,
+    occasion,
+    sponsored: false,
+  });
+
+  const buildLink = (product) => {
+    const retailer = AFFILIATES[product.retailer];
+    return `${retailer.baseUrl}${product.affiliateId}?tag=${retailer.tag}`;
+  };
+
+  const trackClick = (product) => {
+    // 🔁 GA / Meta stub
+    window.dispatchEvent(
+      new CustomEvent('affiliate_click', {
+        detail: {
+          productId: product.id,
+          retailer: product.retailer,
+        },
+      })
+    );
+  };
 
   return (
-    <Card className="p-4 rounded-2xl bg-gradient-to-r from-pink-50 to-purple-50 border border-purple-200 shadow-sm">
-      <div className="flex items-center gap-2 mb-3">
-        <Sparkles className="h-5 w-5 text-pink-600" />
-        <span className="font-semibold text-purple-800">
-          Recommended Beauty Pick
-        </span>
-      </div>
+    <Card className="p-6 rounded-3xl bg-white/90 shadow-md">
+      <h3 className="text-lg font-semibold mb-4 text-center">
+        💄 Beauty Picks for You
+      </h3>
 
-      <div className="flex gap-4 items-center">
-        <div className="w-20 h-20 rounded-xl bg-white flex items-center justify-center overflow-hidden">
-          <img
-            src={item.image}
-            alt={item.product}
-            className="object-cover w-full h-full"
-          />
-        </div>
-
-        <div className="flex-1">
-          <p className="text-sm text-gray-500">{item.brand}</p>
-          <p className="font-semibold text-gray-800">{item.product}</p>
-
-          <a
-            href={item.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 mt-2 text-sm font-medium text-purple-600 hover:underline"
+      <div className="space-y-4">
+        {products.map((product) => (
+          <div
+            key={product.id}
+            className="flex items-center justify-between border rounded-xl p-4"
           >
-            {item.cta}
-            <ExternalLink className="h-4 w-4" />
-          </a>
-        </div>
+            <div>
+              <p className="font-semibold">{product.name}</p>
+              <p className="text-sm text-gray-500">
+                {product.brand} • {product.price}
+              </p>
+
+              {product.sponsored && (
+                <span className="inline-flex items-center gap-1 text-xs text-purple-600 mt-1">
+                  <Star className="h-3 w-3" /> Sponsored
+                </span>
+              )}
+            </div>
+
+            <Button
+              size="sm"
+              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+              onClick={() => {
+                trackClick(product);
+                window.open(buildLink(product), '_blank');
+              }}
+            >
+              Shop <ExternalLink className="ml-1 h-4 w-4" />
+            </Button>
+          </div>
+        ))}
       </div>
+
+      <p className="text-xs text-gray-400 mt-4 text-center">
+        Affiliate links support FaceUp 💜
+      </p>
     </Card>
   );
 };
