@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useSession } from '../hooks/useSession.jsx';
 import { useUserRole, hasAccess } from '../hooks/useUserRole';
+import { useEntitlements } from '../hooks/useEntitlements';
+
 
 // Components
 import Header from '../components/Header';
