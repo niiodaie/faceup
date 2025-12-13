@@ -2,20 +2,13 @@ import React from 'react';
 import { Card } from './ui/card';
 import { Sparkles } from 'lucide-react';
 import { getSponsoredLooks } from '../lib/sponsoredLooksEngine';
-import { track } from '../lib/track';
+import { trackEvent } from '../lib/track';
 
 const SponsoredProLooks = ({ moods = [], occasion }) => {
-  // 🔒 SAFETY: ensure function exists
-  if (typeof getSponsoredLooks !== 'function') {
-    console.warn('[SponsoredProLooks] getSponsoredLooks not available');
-    return null;
-  }
+  if (typeof getSponsoredLooks !== 'function') return null;
 
   const looks = getSponsoredLooks({ moods, occasion }) || [];
-
-  if (!Array.isArray(looks) || looks.length === 0) {
-    return null;
-  }
+  if (!looks.length) return null;
 
   return (
     <div className="mb-10">
@@ -26,10 +19,7 @@ const SponsoredProLooks = ({ moods = [], occasion }) => {
 
       <div className="grid md:grid-cols-2 gap-6">
         {looks.map((look) => (
-          <Card
-            key={look.id}
-            className="overflow-hidden rounded-2xl shadow-lg"
-          >
+          <Card key={look.id} className="overflow-hidden rounded-2xl shadow-lg">
             <div className="relative">
               <img
                 src={look.image}
@@ -50,12 +40,12 @@ const SponsoredProLooks = ({ moods = [], occasion }) => {
               <button
                 onClick={() => {
                   try {
-                    track('sponsored_look_click', {
+                    trackEvent('sponsored_look_click', {
                       lookId: look.id,
                       sponsor: look.sponsor,
                     });
                   } catch (e) {
-                    console.warn('Track failed', e);
+                    console.warn('Tracking failed', e);
                   }
 
                   window.open(look.url, '_blank', 'noopener,noreferrer');
