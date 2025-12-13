@@ -1,5 +1,9 @@
 import React from 'react';
 import { ExternalLink, Sparkles } from 'lucide-react';
+import { getProductsForContext } from '../lib/affiliateProductEngine';
+
+const products = getProductsForContext(moods, occasion);
+
 
 /**
  * BeautyAffiliateBlock
