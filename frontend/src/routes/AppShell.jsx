@@ -1,14 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useSession } from '../hooks/useSession.jsx';
-import { useEntitlements } from '../hooks/useEntitlements';
-import AdBanner from '../components/AdBanner';
-import { useEntitlements } from '../hooks/useEntitlements';
-
-const { entitlements, loading: entitlementsLoading } = useEntitlements();
-
-if (entitlementsLoading) return null;
-
+import { useEntitlements } from '../hooks/useEntitlements'; // ✅ SINGLE import
+import { useUserRole, hasAccess } from '../hooks/useUserRole';
 
 // Components
 import Header from '../components/Header';
@@ -25,14 +19,11 @@ import FaceScanPage from '../FaceScanPage';
 import PricingPage from '../pages/pricing';
 import Dashboard from '../pages/dashboard';
 import ScanPage from '../pages/scan';
-import ResultsPage from '../pages/results';
+import ResultsPage from '../pages/ResultsPage'; // ✅ consistent casing
 
-/**
- * AppShell - Main application for /app/*
- * Supports: Auth users, Free users, Guest Trial users
- */
 export default function AppShell() {
   const navigate = useNavigate();
+
   const [selectedMoods, setSelectedMoods] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('EN');
@@ -46,17 +37,16 @@ export default function AppShell() {
     isGuest,
     guestTrialEnd,
     signOut,
+    enableGuestMode,
     disableGuestMode,
   } = useSession();
 
-  const {
-    entitlements,
-    loading: entitlementsLoading,
-  } = useEntitlements();
+  const { entitlements, loading: entitlementsLoading } = useEntitlements();
+  const userRole = entitlements?.plan || 'free';
 
-  /**
-   * AUTO-EXPIRE GUEST TRIAL
-   */
+  /* =====================================================
+     AUTO-EXPIRE GUEST TRIAL
+     ===================================================== */
   useEffect(() => {
     if (isGuest && guestTrialEnd && Date.now() >= guestTrialEnd) {
       disableGuestMode();
@@ -64,27 +54,24 @@ export default function AppShell() {
     }
   }, [isGuest, guestTrialEnd, disableGuestMode, navigate]);
 
-  /**
-   * Require Login if no session & not guest
-   */
+  /* =====================================================
+     AUTH GUARDS
+     ===================================================== */
   if (!loading && !user && !isGuest) {
     return <Navigate to="/auth/login" replace />;
   }
 
-  /**
-   * Loading State
-   */
   if (loading || entitlementsLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading…
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600" />
       </div>
     );
   }
 
-  /**
-   * GUEST MODE EXPERIENCE
-   */
+  /* =====================================================
+     GUEST MODE
+     ===================================================== */
   if (isGuest) {
     return (
       <Routes>
@@ -103,30 +90,12 @@ export default function AppShell() {
     );
   }
 
-  /**
-   * Handlers
-   */
+  /* =====================================================
+     HANDLERS
+     ===================================================== */
   const handleFaceScan = async () => {
     setIsScanning(true);
-    try {
-      console.log('Scanning face…');
-    } finally {
-      setIsScanning(false);
-    }
-  };
-
-  const handleCaptureImage = (imageData) => {
-    setCapturedImage(imageData);
-  };
-
-  const handleMoodToggle = (mood) => {
-    setSelectedMoods((prev) =>
-      prev.includes(mood) ? prev.filter((m) => m !== mood) : [...prev, mood]
-    );
-  };
-
-  const handleLanguageToggle = () => {
-    setCurrentLanguage((prev) => (prev === 'EN' ? 'ES' : 'EN'));
+    setTimeout(() => setIsScanning(false), 1500);
   };
 
   const handleLogout = async () => {
@@ -134,9 +103,9 @@ export default function AppShell() {
     navigate('/');
   };
 
-  /**
-   * AUTHENTICATED UI
-   */
+  /* =====================================================
+     APP ROUTES
+     ===================================================== */
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100">
       <Routes>
@@ -145,78 +114,55 @@ export default function AppShell() {
           element={
             <div className="max-w-md mx-auto">
               <Header
-                onLanguageToggle={handleLanguageToggle}
                 currentLanguage={currentLanguage}
-                session={session}
+                onLanguageToggle={() =>
+                  setCurrentLanguage((l) => (l === 'EN' ? 'ES' : 'EN'))
+                }
                 user={user}
+                userRole={userRole}
                 onLogout={handleLogout}
               />
 
               <main className="px-4 pb-8">
-                <div className="main-card-wrapper p-6 mx-2 mb-8">
-                  <div className="text-center mb-8">
-                    <h1 className="text-5xl font-bold gradient-text mb-3">
-                      FACEUP
-                    </h1>
-                    <p className="text-gray-600 text-lg font-medium">
-                      Be Seen. Be Styled. Be You.
-                    </p>
-                  </div>
+                <FaceScanCard
+                  onFaceScan={handleFaceScan}
+                  isScanning={isScanning}
+                />
 
-                  <div className="space-y-8">
-                    <FaceScanCard
-                      onFaceScan={handleFaceScan}
-                      onCapture={handleCaptureImage}
-                      isScanning={isScanning}
-                      entitlements={entitlements}
-                    />
+                <MoodSelector
+                  selectedMoods={selectedMoods}
+                  onMoodToggle={(m) =>
+                    setSelectedMoods((prev) =>
+                      prev.includes(m)
+                        ? prev.filter((x) => x !== m)
+                        : [...prev, m]
+                    )
+                  }
+                />
 
-                    {capturedImage && (
-                      <div className="flex justify-center">
-                        <div className="polaroid-frame">
-                          <img
-                            src={capturedImage}
-                            alt="Captured face"
-                            className="w-32 h-40 object-cover rounded"
-                          />
-                        </div>
-                      </div>
-                    )}
+                <CutMatchSuggestions
+                  selectedMoods={selectedMoods}
+                  entitlements={entitlements}
+                />
 
-                    <MoodSelector
-                      selectedMoods={selectedMoods}
-                      onMoodToggle={handleMoodToggle}
-                      title="What's today about?"
-                    />
+                {showUpgradePrompt && (
+                  <UpgradePrompt
+                    feature={showUpgradePrompt}
+                    onClose={() => setShowUpgradePrompt(null)}
+                    onUpgrade={() => navigate('/app/pricing')}
+                  />
+                )}
 
-                    <CutMatchSuggestions
-                      selectedMoods={selectedMoods}
-                      entitlements={entitlements}
-                    />
-
-                    {showUpgradePrompt && (
-                      <UpgradePrompt
-                        feature={showUpgradePrompt}
-                        onClose={() => setShowUpgradePrompt(null)}
-                        onUpgrade={() => navigate('/app/pricing')}
-                      />
-                    )}
-
-                    <AffiliateLinks />
-                    <SocialShare />
-                  </div>
-                </div>
+                <AffiliateLinks />
+                <SocialShare />
               </main>
             </div>
           }
         />
 
-        <Route path="/scan" element={<ScanPage />} />
-        <Route path="/face-scan" element={<FaceScanPage />} />
         <Route path="/results/:sessionId" element={<ResultsPage />} />
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
-
         <Route path="*" element={<Navigate to="/app" replace />} />
       </Routes>
     </div>
