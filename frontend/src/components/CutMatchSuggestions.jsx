@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Lock, Sparkles } from 'lucide-react';
-import AdBanner from './AdBanner';
+import BeautyAffiliateBlock from './BeautyAffiliateBlock';
 
 const CutMatchSuggestions = ({
   selectedMoods = [],
