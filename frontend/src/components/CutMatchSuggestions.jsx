@@ -144,7 +144,7 @@ const CutMatchSuggestions = ({
       {/* FREE PLAN ADS */}
       {showAds && (
         <div className="my-4">
-          <AdBanner />
+          <BeautyAffiliateBlock />
         </div>
       )}
 
