@@ -2,58 +2,47 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Lock } from 'lucide-react';
 import { useSession } from '../hooks/useSession.jsx';
+import { useEntitlements } from '../hooks/useEntitlements';
 
 const ResultsPage = () => {
   const { sessionId } = useParams();
   const navigate = useNavigate();
-  const { user, isGuest } = useSession();
+  const { isGuest } = useSession();
+  const { entitlements, loading: entitlementsLoading } = useEntitlements();
 
   const [results, setResults] = useState(null);
-  const [entitlements, setEntitlements] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
   /* =====================================================
-     FETCH RESULTS + ENTITLEMENTS
+     FETCH RESULTS
      ===================================================== */
   useEffect(() => {
-    if (sessionId) {
-      fetchResults();
-      fetchEntitlements();
-    }
+    if (!sessionId) return;
+
+    const fetchResults = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`${API_URL}/suggestions/${sessionId}`);
+        if (!res.ok) throw new Error('Failed to fetch results');
+        const data = await res.json();
+        setResults(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResults();
   }, [sessionId]);
-
-  const fetchResults = async () => {
-    try {
-      const res = await fetch(`${API_URL}/suggestions/${sessionId}`);
-      if (!res.ok) throw new Error('Failed to fetch results');
-      const data = await res.json();
-      setResults(data);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  const fetchEntitlements = async () => {
-    if (!user) return;
-
-    try {
-      const res = await fetch(`${API_URL}/entitlements/${user.id}`);
-      const data = await res.json();
-      setEntitlements(data);
-    } catch (err) {
-      console.error('Entitlement fetch failed:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   /* =====================================================
      LOADING / ERROR STATES
      ===================================================== */
-  if (loading) {
+  if (loading || entitlementsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100">
         <div className="animate-spin rounded-full h-14 w-14 border-b-4 border-purple-600" />
@@ -191,7 +180,6 @@ const ResultsPage = () => {
             </button>
           </div>
         )}
-
       </div>
     </div>
   );
@@ -215,4 +203,3 @@ const LockedBlock = ({ title, text, onUpgrade }) => (
 );
 
 export default ResultsPage;
-
