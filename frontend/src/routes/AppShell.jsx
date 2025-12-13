@@ -2,6 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useSession } from '../hooks/useSession.jsx';
 import { useEntitlements } from '../hooks/useEntitlements';
+import AdBanner from '../components/AdBanner';
+import { useEntitlements } from '../hooks/useEntitlements';
+
+const { entitlements, loading: entitlementsLoading } = useEntitlements();
+
+if (entitlementsLoading) return null;
+
 
 // Components
 import Header from '../components/Header';
