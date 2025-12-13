@@ -14,10 +14,8 @@ import SocialShare from '../components/SocialShare';
 import GuestDemo from '../components/GuestDemo';
 
 // Pages
-import FaceScanPage from '../FaceScanPage';
 import PricingPage from '../pages/pricing';
 import Dashboard from '../pages/dashboard';
-import ScanPage from '../pages/scan';
 import ResultsPage from '../pages/ResultsPage';
 
 export default function AppShell() {
@@ -41,7 +39,7 @@ export default function AppShell() {
   const userRole = entitlements?.plan || 'free';
 
   /* =====================================================
-     AUTO-EXPIRE GUEST TRIAL
+     AUTO-EXPIRE GUEST
      ===================================================== */
   useEffect(() => {
     if (isGuest && guestTrialEnd && Date.now() >= guestTrialEnd) {
@@ -51,7 +49,7 @@ export default function AppShell() {
   }, [isGuest, guestTrialEnd, disableGuestMode, navigate]);
 
   /* =====================================================
-     AUTH + ENTITLEMENT GUARDS
+     AUTH GUARDS (MUST BE INSIDE COMPONENT)
      ===================================================== */
   if (loading || entitlementsLoading) {
     return (
@@ -89,7 +87,7 @@ export default function AppShell() {
   /* =====================================================
      HANDLERS
      ===================================================== */
-  const handleFaceScan = async () => {
+  const handleFaceScan = () => {
     setIsScanning(true);
     setTimeout(() => setIsScanning(false), 1500);
   };
@@ -100,7 +98,7 @@ export default function AppShell() {
   };
 
   /* =====================================================
-     APP ROUTES
+     ROUTES
      ===================================================== */
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100">
@@ -159,7 +157,7 @@ export default function AppShell() {
         <Route path="/results/:sessionId" element={<ResultsPage />} />
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="*" element={<Navigate to="/app" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
   );
