@@ -8,6 +8,16 @@ import AdBanner from '../components/AdBanner';
 import BeautyAffiliateBlock from '../components/BeautyAffiliateBlock';
 import SponsoredProLooks from '../components/SponsoredProLooks';
 
+import { trackEmailEvent } from '../lib/track';
+
+useEffect(() => {
+  if (!features.confidenceScore) {
+    trackEmailEvent('confidence_score_locked', {
+      page: 'results',
+    });
+  }
+}, []);
+
 const ResultsPage = () => {
   const { sessionId } = useParams();
   const navigate = useNavigate();
