@@ -87,43 +87,74 @@ const ResultsPage = () => {
           <p className="text-gray-600 text-lg">AI-powered beauty recommendations</p>
         </div>
 
-        {/* FACE ANALYSIS */}
-        {faceAnalysis && (
-          <div className="bg-white rounded-2xl shadow p-8 mb-8">
-            <h2 className="text-2xl font-bold mb-4">Face Analysis</h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-purple-50 p-6 rounded-xl">
-                <h4 className="font-semibold">Face Shape</h4>
-                <p className="text-2xl">{faceAnalysis.faceShape || 'Oval'}</p>
-              </div>
-              <div className="bg-pink-50 p-6 rounded-xl">
-                <h4 className="font-semibold">Skin Tone</h4>
-                <p className="text-2xl">{faceAnalysis.skinTone || 'Warm'}</p>
-              </div>
+        {/* =========================
+    FACE ANALYSIS
+   ========================= */}
+{faceAnalysis && (
+  <div className="bg-white rounded-2xl shadow p-8 mb-6">
+    <h2 className="text-2xl font-bold mb-4">Face Analysis</h2>
+
+    <div className="grid md:grid-cols-2 gap-6">
+      <div className="bg-purple-50 p-6 rounded-xl">
+        <h4 className="font-semibold">Face Shape</h4>
+        <p className="text-2xl">{faceAnalysis.faceShape || 'Oval'}</p>
+      </div>
+
+      <div className="bg-pink-50 p-6 rounded-xl">
+        <h4 className="font-semibold">Skin Tone</h4>
+        <p className="text-2xl">{faceAnalysis.skinTone || 'Warm'}</p>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* FREE PLAN AD — AFTER FACE ANALYSIS */}
+{entitlements?.showAds && (
+  <div className="mb-8">
+    <AdBanner />
+  </div>
+)}
+
+{/* =========================
+    RECOMMENDED STYLES
+   ========================= */}
+{suggestions?.length > 0 && (
+  <div className="bg-white rounded-2xl shadow p-8 mb-6">
+    <h2 className="text-2xl font-bold mb-6">Recommended Styles</h2>
+
+    {suggestions.map((style, idx) => (
+      <div
+        key={idx}
+        className="border rounded-xl p-6 mb-6 last:mb-0"
+      >
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-xl font-bold">{style.name}</h3>
+
+          {features.confidenceScore ? (
+            <div className="text-green-600 font-bold">
+              {Math.round(style.confidence * 100)}%
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="text-gray-400 flex items-center gap-1 text-sm">
+              <Lock className="h-4 w-4" />
+              Pro
+            </div>
+          )}
+        </div>
 
-        {/* HAIRSTYLES */}
-        {suggestions?.length > 0 && (
-          <div className="bg-white rounded-2xl shadow p-8 mb-8">
-            <h2 className="text-2xl font-bold mb-6">Recommended Styles</h2>
+        <p className="text-gray-700">{style.description}</p>
+      </div>
+    ))}
+  </div>
+)}
 
-            {suggestions.map((style, idx) => (
-              <div key={idx} className="border rounded-xl p-6 mb-6">
-                <div className="flex justify-between mb-3">
-                  <h3 className="text-xl font-bold">{style.name}</h3>
+{/* FREE PLAN AD — AFTER STYLES */}
+{entitlements?.showAds && (
+  <div className="mb-10">
+    <AdBanner />
+  </div>
+)}
 
-                  {features.confidenceScore ? (
-                    <div className="text-green-600 font-bold">
-                      {Math.round(style.confidence * 100)}%
-                    </div>
-                  ) : (
-                    <div className="text-gray-400 flex items-center gap-1">
-                      <Lock className="h-4 w-4" /> Pro
-                    </div>
-                  )}
-                </div>
 
                 <p className="text-gray-700">{style.description}</p>
               </div>
