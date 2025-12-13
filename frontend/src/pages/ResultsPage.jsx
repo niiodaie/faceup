@@ -186,20 +186,31 @@ const ResultsPage = () => {
         )}
 
         {/* PERSONAL ADVICE */}
-        {features.personalAdvice ? (
-          generalAdvice && (
-            <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-8 rounded-2xl shadow mb-8">
-              <h2 className="text-2xl font-bold mb-3">Personal Advice</h2>
-              <p>{generalAdvice}</p>
-            </div>
-          )
-        ) : (
-          <LockedBlock
-            title="Personal Advice Locked"
-            text="Upgrade to Pro for personalized beauty insights."
-            onUpgrade={() => navigate('/pricing')}
-          />
-        )}
+{features.personalAdvice ? (
+  generalAdvice && (
+    <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-8 rounded-2xl shadow mb-6">
+      <h2 className="text-2xl font-bold mb-3">Personal Advice</h2>
+      <p>{generalAdvice}</p>
+    </div>
+  )
+) : (
+  <>
+    <LockedBlock
+      title="Personal Advice Locked"
+      text="Upgrade to Pro for personalized beauty insights."
+      onUpgrade={() => navigate('/pricing')}
+    />
+
+    {/* 🔥 FREE / TRIAL MONETIZATION — INLINE AFFILIATES */}
+    <BeautyAffiliateBlock
+      moods={selectedMoods}
+      occasion={selectedMoods?.[0]}
+      entitlements={entitlements}
+      placement="results_personal_advice"
+    />
+  </>
+)}
+
 
         {/* GUEST CTA */}
         {isGuest && (
