@@ -73,3 +73,12 @@ export async function trackEmailEvent(event, metadata = {}) {
   }
 }
 
+import { trackEvent } from "./analytics";
+
+/**
+ * Generic event tracker
+ * Used by ads, sponsored looks, experiments, etc.
+ */
+export function track(event, metadata = {}) {
+  trackEvent(event, metadata);
+}
