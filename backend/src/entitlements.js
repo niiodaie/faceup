@@ -1,56 +1,104 @@
-import { supabase } from './supabaseService.js';
+import { getUserSubscription, checkUsageLimit } from './supabaseService.js';
 
 export async function resolveEntitlements(userId) {
+  // Guest
   if (!userId) {
     return {
-      plan: 'guest',
-      isTrialActive: false,
+      role: 'guest',
       features: {
-        scan: true,
-        save: false,
-        history: false,
-        advancedAI: false,
-        ads: true
+        faceScan: true,
+        scansPerMonth: 3,
+        aiSuggestions: true,
+        saveHistory: false,
+        adsEnabled: true,
+        priorityQueue: false,
+        arTryOn: false
       },
-      limits: { scans: 3 }
+      limits: {
+        scansRemaining: 3,
+        trialEndsAt: null
+      }
     };
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('plan, trial_ends_at')
-    .eq('id', userId)
-    .single();
+  const subscription = await getUserSubscription(userId);
+  const usage = await checkUsageLimit(userId);
 
-  let plan = profile?.plan || 'free';
-  let isTrialActive = false;
-
-  // Trial expiration enforcement
-  if (plan === 'trial') {
-    if (profile.trial_ends_at && new Date(profile.trial_ends_at) > new Date()) {
-      isTrialActive = true;
-    } else {
-      // Auto-downgrade expired trial
-      await supabase
-        .from('profiles')
-        .update({ plan: 'free', ads_enabled: true })
-        .eq('id', userId);
-      plan = 'free';
-    }
+  // Free (registered, no subscription)
+  if (!subscription) {
+    return {
+      role: 'free',
+      features: {
+        faceScan: true,
+        scansPerMonth: 5,
+        aiSuggestions: true,
+        saveHistory: false,
+        adsEnabled: true,
+        priorityQueue: false,
+        arTryOn: false
+      },
+      limits: {
+        scansRemaining: Math.max(0, 5 - (usage?.scan_count || 0)),
+        trialEndsAt: null
+      }
+    };
   }
 
+  // Trial
+  if (subscription.status === 'trialing') {
+    return {
+      role: 'trial',
+      features: {
+        faceScan: true,
+        scansPerMonth: 'unlimited',
+        aiSuggestions: true,
+        saveHistory: true,
+        adsEnabled: false,
+        priorityQueue: true,
+        arTryOn: true
+      },
+      limits: {
+        scansRemaining: null,
+        trialEndsAt: subscription.current_period_end
+      }
+    };
+  }
+
+  // Pro (paid)
+  if (subscription.status === 'active') {
+    return {
+      role: 'pro',
+      features: {
+        faceScan: true,
+        scansPerMonth: 'unlimited',
+        aiSuggestions: true,
+        saveHistory: true,
+        adsEnabled: false,
+        priorityQueue: true,
+        arTryOn: true
+      },
+      limits: {
+        scansRemaining: null,
+        trialEndsAt: null
+      }
+    };
+  }
+
+  // Fallback (expired / unpaid)
   return {
-    plan,
-    isTrialActive,
+    role: 'free',
     features: {
-      scan: true,
-      save: plan !== 'free',
-      history: plan !== 'free',
-      advancedAI: plan === 'pro' || isTrialActive,
-      ads: plan === 'free'
+      faceScan: true,
+      scansPerMonth: 3,
+      aiSuggestions: true,
+      saveHistory: false,
+      adsEnabled: true,
+      priorityQueue: false,
+      arTryOn: false
     },
     limits: {
-      scans: plan === 'free' ? 5 : null
+      scansRemaining: 3,
+      trialEndsAt: null
     }
   };
 }
