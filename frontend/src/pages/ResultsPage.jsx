@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Lock } from 'lucide-react';
 import { useSession } from '../hooks/useSession.jsx';
 import { useEntitlements } from '../hooks/useEntitlements';
+import AdBanner from '../components/AdBanner';
+
 
 const ResultsPage = () => {
   const { sessionId } = useParams();
