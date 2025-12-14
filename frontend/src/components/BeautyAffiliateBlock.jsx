@@ -18,7 +18,9 @@ const BeautyAffiliateBlock = ({
   // Pro users see NO ads
   if (entitlements?.plan === 'pro') return null;
 
+  const BeautyAffiliateBlock = ({ moods = [], occasion = '' }) => {
   const products = getProductsForContext(moods, occasion);
+
 
   if (!products.length) return null;
 
