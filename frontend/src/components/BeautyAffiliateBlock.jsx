@@ -1,9 +1,7 @@
 import React from 'react';
 import { ExternalLink, Sparkles } from 'lucide-react';
 import { getProductsForContext } from '../lib/affiliateProductEngine';
-
-const products = getProductsForContext(moods, occasion);
-
+import { trackAffiliateClick } from '../utils/trackAffiliate';
 
 /**
  * BeautyAffiliateBlock
@@ -11,16 +9,16 @@ const products = getProductsForContext(moods, occasion);
  */
 const BeautyAffiliateBlock = ({
   moods = [],
-  occasion,
+  occasion = '',
   entitlements,
   placement = 'results',
 }) => {
   // Pro users see NO ads
   if (entitlements?.plan === 'pro') return null;
 
-  const BeautyAffiliateBlock = ({ moods = [], occasion = '' }) => {
-  const products = getProductsForContext(moods, occasion);
-
+  // Defensive: always pass safe values
+  const safeMoods = Array.isArray(moods) ? moods : [];
+  const products = getProductsForContext(safeMoods, occasion) || [];
 
   if (!products.length) return null;
 
