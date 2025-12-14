@@ -7,7 +7,9 @@ import { track } from "../lib/track";
 const SponsoredProLooks = ({ moods = [], occasion }) => {
   if (typeof getSponsoredLooks !== "function") return null;
 
-  const looks = getSponsoredLooks({ moods, occasion }) || [];
+  // Defensive: ensure moods is an array
+  const safeMoods = Array.isArray(moods) ? moods : [];
+  const looks = getSponsoredLooks({ moods: safeMoods, occasion }) || [];
   if (!Array.isArray(looks) || looks.length === 0) return null;
 
   return (
