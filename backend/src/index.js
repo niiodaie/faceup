@@ -26,7 +26,7 @@ import { createCheckoutSession, getSubscriptionStatus } from './stripe.js';
 import { resolveEntitlements } from './entitlements.js';
 
 // Email retargeting / analytics
-import { trackEmail } from './routes/email.js';
+import { trackEmail } from './trackEmail.js';
 
 
 /* =========================================================

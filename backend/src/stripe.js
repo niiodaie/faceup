@@ -4,13 +4,23 @@ import { getUserSubscription } from './supabaseService.js';
 
 dotenv.config();
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = process.env.STRIPE_SECRET_KEY 
+  ? new Stripe(process.env.STRIPE_SECRET_KEY)
+  : null;
+
+if (!stripe) {
+  console.warn('⚠️  Missing STRIPE_SECRET_KEY - Stripe checkout will be disabled');
+}
 
 /**
  * CREATE CHECKOUT SESSION
  * POST /stripe/create-checkout
  */
 export async function createCheckoutSession(req, res) {
+  if (!stripe) {
+    return res.status(503).json({ error: 'Stripe not configured' });
+  }
+  
   try {
     const { userId, priceId } = req.body;
 

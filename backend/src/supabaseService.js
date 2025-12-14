@@ -7,21 +7,29 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseServiceKey) {
-  throw new Error('Missing Supabase environment variables');
+  console.warn('⚠️  Missing Supabase environment variables - some features will be disabled');
+  console.warn('   Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env');
 }
 
 // Create Supabase client with service role key for backend operations
-export const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-});
+export const supabase = (supabaseUrl && supabaseServiceKey)
+  ? createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    })
+  : null;
 
 /**
  * Save face scan session to database
  */
 export async function saveFaceScanSession(data) {
+  if (!supabase) {
+    console.warn('Supabase not configured - skipping session save');
+    return { id: data.sessionId, status: 'processing' };
+  }
+  
   const { userId, imageUrl, mood, style, sessionId } = data;
   
   const { data: session, error } = await supabase
@@ -50,6 +58,11 @@ export async function saveFaceScanSession(data) {
  * Update face scan session status and result
  */
 export async function updateFaceScanSession(sessionId, updates) {
+  if (!supabase) {
+    console.warn('Supabase not configured - skipping session update');
+    return { id: sessionId, ...updates };
+  }
+  
   const { data, error } = await supabase
     .from('face_scan_sessions')
     .update({
@@ -72,6 +85,11 @@ export async function updateFaceScanSession(sessionId, updates) {
  * Get face scan session by ID
  */
 export async function getFaceScanSession(sessionId) {
+  if (!supabase) {
+    console.warn('Supabase not configured - returning null session');
+    return null;
+  }
+  
   const { data, error } = await supabase
     .from('face_scan_sessions')
     .select('*')
@@ -90,6 +108,11 @@ export async function getFaceScanSession(sessionId) {
  * Save hairstyle suggestions to database
  */
 export async function saveHairstyleSuggestions(sessionId, suggestions) {
+  if (!supabase) {
+    console.warn('Supabase not configured - skipping suggestions save');
+    return [];
+  }
+  
   const suggestionRecords = suggestions.map(suggestion => ({
     session_id: sessionId,
     hairstyle_name: suggestion.name,
@@ -116,6 +139,11 @@ export async function saveHairstyleSuggestions(sessionId, suggestions) {
  * Get hairstyle suggestions for a session
  */
 export async function getHairstyleSuggestions(sessionId) {
+  if (!supabase) {
+    console.warn('Supabase not configured - returning empty suggestions');
+    return [];
+  }
+  
   const { data, error } = await supabase
     .from('hairstyle_suggestions')
     .select('*')
@@ -134,6 +162,10 @@ export async function getHairstyleSuggestions(sessionId) {
  * Upload image to Supabase Storage
  */
 export async function uploadImage(bucket, filePath, fileBuffer, contentType) {
+  if (!supabase) {
+    throw new Error('Supabase not configured - cannot upload images');
+  }
+  
   const { data, error } = await supabase.storage
     .from(bucket)
     .upload(filePath, fileBuffer, {
@@ -158,6 +190,11 @@ export async function uploadImage(bucket, filePath, fileBuffer, contentType) {
  * Update user subscription status
  */
 export async function updateSubscription(userId, subscriptionData) {
+  if (!supabase) {
+    console.warn('Supabase not configured - skipping subscription update');
+    return null;
+  }
+  
   const { data, error } = await supabase
     .from('subscriptions')
     .upsert({
@@ -185,6 +222,11 @@ export async function updateSubscription(userId, subscriptionData) {
  * Get user subscription
  */
 export async function getUserSubscription(userId) {
+  if (!supabase) {
+    console.warn('Supabase not configured - returning null subscription');
+    return null;
+  }
+  
   const { data, error } = await supabase
     .from('subscriptions')
     .select('*')

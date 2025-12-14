@@ -4,14 +4,24 @@ import { updateSubscription } from '../supabaseService.js';
 
 dotenv.config();
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = process.env.STRIPE_SECRET_KEY 
+  ? new Stripe(process.env.STRIPE_SECRET_KEY)
+  : null;
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+if (!stripe) {
+  console.warn('⚠️  Missing STRIPE_SECRET_KEY - Stripe features will be disabled');
+}
 
 /**
  * STRIPE WEBHOOK HANDLER
  * POST /stripe/webhook
  */
 export async function handleStripeWebhook(req, res) {
+  if (!stripe) {
+    return res.status(503).json({ error: 'Stripe not configured' });
+  }
+  
   const signature = req.headers['stripe-signature'];
   let event;
 
