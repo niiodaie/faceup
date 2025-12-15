@@ -1,24 +1,43 @@
-// frontend/src/hooks/useSession.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../utils/supabaseClient";
 
 const SessionContext = createContext(null);
 
+const GUEST_TRIAL_DAYS = 7;
+const GUEST_TRIAL_KEY = "faceup_guest_trial_start";
+
 export function SessionProvider({ children }) {
   const [session, setSession] = useState(null);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  const [isGuest, setIsGuest] = useState(
-    localStorage.getItem("faceup_guest") === "true"
-  );
+  const [isGuest, setIsGuest] = useState(false);
+  const [guestTrialEnd, setGuestTrialEnd] = useState(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
+    const init = async () => {
+      const { data } = await supabase.auth.getSession();
+
+      setSession(data?.session ?? null);
+      setUser(data?.session?.user ?? null);
+
+      const guest = localStorage.getItem("faceup_guest_mode") === "true";
+      setIsGuest(guest);
+
+      if (guest) {
+        let start = localStorage.getItem(GUEST_TRIAL_KEY);
+        if (!start) {
+          start = Date.now();
+          localStorage.setItem(GUEST_TRIAL_KEY, start);
+        }
+        setGuestTrialEnd(
+          Number(start) + GUEST_TRIAL_DAYS * 24 * 60 * 60 * 1000
+        );
+      }
+
       setLoading(false);
-    });
+    };
+
+    init();
 
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
@@ -30,19 +49,17 @@ export function SessionProvider({ children }) {
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  const enableGuest = () => {
-    localStorage.setItem("faceup_guest", "true");
-    localStorage.setItem(
-      "faceup_guest_expires",
-      Date.now() + 7 * 24 * 60 * 60 * 1000
-    );
+  const enableGuestMode = () => {
+    localStorage.setItem("faceup_guest_mode", "true");
+    localStorage.setItem(GUEST_TRIAL_KEY, Date.now());
     setIsGuest(true);
   };
 
-  const disableGuest = () => {
-    localStorage.removeItem("faceup_guest");
-    localStorage.removeItem("faceup_guest_expires");
+  const disableGuestMode = () => {
+    localStorage.removeItem("faceup_guest_mode");
+    localStorage.removeItem(GUEST_TRIAL_KEY);
     setIsGuest(false);
+    setGuestTrialEnd(null);
   };
 
   return (
@@ -50,14 +67,14 @@ export function SessionProvider({ children }) {
       value={{
         session,
         user,
-        isAuthenticated: !!user,
-        isGuest,
         loading,
-        enableGuest,
-        disableGuest,
+        isGuest,
+        guestTrialEnd,
+        enableGuestMode,
+        disableGuestMode,
         signOut: async () => {
           await supabase.auth.signOut();
-          disableGuest();
+          disableGuestMode();
         },
       }}
     >
@@ -66,6 +83,8 @@ export function SessionProvider({ children }) {
   );
 }
 
-export function useSession() {
-  return useContext(SessionContext);
-}
+export const useSession = () => {
+  const ctx = useContext(SessionContext);
+  if (!ctx) throw new Error("useSession must be used within SessionProvider");
+  return ctx;
+};
