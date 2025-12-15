@@ -1,11 +1,8 @@
-// hooks/useSession.jsx
+// frontend/src/hooks/useSession.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../utils/supabaseClient";
 
 const SessionContext = createContext(null);
-
-const GUEST_TRIAL_DAYS = 7;
-const GUEST_TRIAL_KEY = "faceup_guest_trial_start";
 
 export function SessionProvider({ children }) {
   const [session, setSession] = useState(null);
@@ -13,36 +10,15 @@ export function SessionProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   const [isGuest, setIsGuest] = useState(
-    localStorage.getItem("faceup_guest_mode") === "true"
+    localStorage.getItem("faceup_guest") === "true"
   );
 
-  const [guestTrialEnd, setGuestTrialEnd] = useState(null);
-
   useEffect(() => {
-    const init = async () => {
-      const { data } = await supabase.auth.getSession();
+    supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setUser(data.session?.user ?? null);
-
-      // 🟣 Initialize guest trial
-      if (localStorage.getItem("faceup_guest_mode") === "true") {
-        let start = localStorage.getItem(GUEST_TRIAL_KEY);
-
-        if (!start) {
-          start = Date.now();
-          localStorage.setItem(GUEST_TRIAL_KEY, start);
-        }
-
-        const end =
-          Number(start) + GUEST_TRIAL_DAYS * 24 * 60 * 60 * 1000;
-
-        setGuestTrialEnd(end);
-      }
-
       setLoading(false);
-    };
-
-    init();
+    });
 
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
@@ -54,17 +30,19 @@ export function SessionProvider({ children }) {
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  const enableGuestMode = () => {
-    localStorage.setItem("faceup_guest_mode", "true");
-    localStorage.setItem(GUEST_TRIAL_KEY, Date.now());
+  const enableGuest = () => {
+    localStorage.setItem("faceup_guest", "true");
+    localStorage.setItem(
+      "faceup_guest_expires",
+      Date.now() + 7 * 24 * 60 * 60 * 1000
+    );
     setIsGuest(true);
   };
 
-  const disableGuestMode = () => {
-    localStorage.removeItem("faceup_guest_mode");
-    localStorage.removeItem(GUEST_TRIAL_KEY);
+  const disableGuest = () => {
+    localStorage.removeItem("faceup_guest");
+    localStorage.removeItem("faceup_guest_expires");
     setIsGuest(false);
-    setGuestTrialEnd(null);
   };
 
   return (
@@ -72,14 +50,14 @@ export function SessionProvider({ children }) {
       value={{
         session,
         user,
-        loading,
+        isAuthenticated: !!user,
         isGuest,
-        guestTrialEnd, // ✅ NOW DEFINED
-        enableGuestMode,
-        disableGuestMode,
+        loading,
+        enableGuest,
+        disableGuest,
         signOut: async () => {
           await supabase.auth.signOut();
-          disableGuestMode();
+          disableGuest();
         },
       }}
     >
@@ -88,8 +66,6 @@ export function SessionProvider({ children }) {
   );
 }
 
-export const useSession = () => {
-  const ctx = useContext(SessionContext);
-  if (!ctx) throw new Error("useSession must be used inside SessionProvider");
-  return ctx;
-};
+export function useSession() {
+  return useContext(SessionContext);
+}
