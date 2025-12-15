@@ -13,32 +13,15 @@ import { Camera, Sparkles, User, Clock, Star } from "lucide-react";
 import MoodSelector from "./MoodSelector";
 import CutMatchSuggestions from "./CutMatchSuggestions";
 import { USER_ROLES, hasAccess } from "../hooks/useUserRole";
-import { useSession } from "../hooks/useSession";
 
 export default function GuestDemo() {
   const navigate = useNavigate();
-  const session = useSession();
-
-  // 🔒 Guard: wait for session to hydrate
-  if (!session) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin h-6 w-6 border-2 border-purple-500 border-t-transparent rounded-full" />
-      </div>
-    );
-  }
-
-  const { guestTrialEnd } = session;
 
   const [selectedMoods, setSelectedMoods] = useState([]);
   const [showDemo, setShowDemo] = useState(false);
 
-  const daysLeft = guestTrialEnd
-    ? Math.max(
-        0,
-        Math.ceil((guestTrialEnd - Date.now()) / (1000 * 60 * 60 * 24))
-      )
-    : 3; // fallback demo window
+  // Static guest messaging (NO session dependency)
+  const daysLeft = 3;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100">
@@ -68,13 +51,14 @@ export default function GuestDemo() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-purple-600" />
-              Free Trial Active
+              Free Trial
             </CardTitle>
           </CardHeader>
           <CardContent>
             <Alert>
               <AlertDescription>
-                Enjoy a limited demo. Sign up to save your looks.
+                You’re exploring FaceUp as a guest.  
+                Sign up anytime to save your looks.
               </AlertDescription>
             </Alert>
           </CardContent>
@@ -85,12 +69,15 @@ export default function GuestDemo() {
           <CardHeader>
             <CardTitle>Try FaceUp</CardTitle>
             <CardDescription>
-              Explore styles during your free trial
+              Explore styles without an account
             </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-4">
-            <Button onClick={() => setShowDemo(true)} className="w-full">
+            <Button
+              onClick={() => setShowDemo(true)}
+              className="w-full"
+            >
               <Camera className="h-4 w-4 mr-2" />
               Try Demo Scan
             </Button>
