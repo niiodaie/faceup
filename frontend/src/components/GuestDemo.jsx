@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import {
@@ -15,13 +15,33 @@ import CutMatchSuggestions from "./CutMatchSuggestions";
 import { USER_ROLES, hasAccess } from "../hooks/useUserRole";
 import { useSession } from "../hooks/useSession";
 
-export default function GuestDemo({ onSignUp }) {
+/**
+ * GuestDemo
+ * ----------
+ * Explicit guest-only experience.
+ * No auth required.
+ * No redirects unless trial expires.
+ */
+export default function GuestDemo({ onSignUp = () => {} }) {
   const navigate = useNavigate();
-  const { guestTrialEnd } = useSession();
+  const { guestTrialEnd, setGuestSession } = useSession();
 
   const [selectedMoods, setSelectedMoods] = useState([]);
   const [showDemo, setShowDemo] = useState(false);
 
+  /**
+   * IMPORTANT
+   * ----------
+   * Explicitly mark this route as a guest session.
+   * This prevents AppShell / route guards from spinning forever.
+   */
+  useEffect(() => {
+    setGuestSession(true);
+  }, [setGuestSession]);
+
+  /**
+   * Trial countdown (defensive)
+   */
   const daysLeft = guestTrialEnd
     ? Math.max(
         0,
@@ -29,8 +49,13 @@ export default function GuestDemo({ onSignUp }) {
       )
     : 0;
 
+  /**
+   * Trial expiration → upgrade flow
+   */
   useEffect(() => {
-    if (daysLeft <= 0) onSignUp();
+    if (daysLeft <= 0 && typeof onSignUp === "function") {
+      onSignUp();
+    }
   }, [daysLeft, onSignUp]);
 
   return (
@@ -48,9 +73,10 @@ export default function GuestDemo({ onSignUp }) {
               <User className="inline h-3 w-3 mr-1" />
               GUEST
             </span>
+
             <span className="px-3 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
               <Clock className="inline h-3 w-3 mr-1" />
-              {daysLeft} days left
+              {daysLeft} day{daysLeft !== 1 ? "s" : ""} left
             </span>
           </div>
         </div>
@@ -63,17 +89,18 @@ export default function GuestDemo({ onSignUp }) {
               Free Trial Active
             </CardTitle>
           </CardHeader>
+
           <CardContent>
             <Alert>
               <AlertDescription>
-                Trial ends in {daysLeft} day{daysLeft !== 1 ? "s" : ""}.  
-                Sign up to save your looks.
+                Enjoy limited access during your free trial.  
+                Sign up to save looks and unlock full features.
               </AlertDescription>
             </Alert>
           </CardContent>
         </Card>
 
-        {/* Actions */}
+        {/* Demo Actions */}
         <Card>
           <CardHeader>
             <CardTitle>Try FaceUp</CardTitle>
@@ -83,7 +110,10 @@ export default function GuestDemo({ onSignUp }) {
           </CardHeader>
 
           <CardContent className="space-y-4">
-            <Button onClick={() => setShowDemo(true)} className="w-full">
+            <Button
+              className="w-full"
+              onClick={() => setShowDemo(true)}
+            >
               <Camera className="h-4 w-4 mr-2" />
               Try Demo Scan
             </Button>
@@ -92,11 +122,11 @@ export default function GuestDemo({ onSignUp }) {
               <>
                 <MoodSelector
                   selectedMoods={selectedMoods}
-                  onMoodToggle={(m) =>
+                  onMoodToggle={(mood) =>
                     setSelectedMoods((prev) =>
-                      prev.includes(m)
-                        ? prev.filter((x) => x !== m)
-                        : [...prev, m]
+                      prev.includes(mood)
+                        ? prev.filter((x) => x !== mood)
+                        : [...prev, mood]
                     )
                   }
                 />
