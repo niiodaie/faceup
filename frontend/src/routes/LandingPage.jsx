@@ -1,11 +1,11 @@
-frontend/src/routes/LandingPage.jsx
 import React from 'react';
 import IntroPage from '../components/IntroPage';
+import { useNavigate } from 'react-router-dom';
 
-/**
- * LandingPage - Public landing page at root (/)
- * This is the main entry point for visitors
- */
 export default function LandingPage() {
-  return <IntroPage />;
+  const navigate = useNavigate();
+
+  return (
+    <IntroPage onGuestDemo={() => navigate('/app/guest')} />
+  );
 }
