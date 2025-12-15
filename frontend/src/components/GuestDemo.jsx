@@ -108,9 +108,9 @@ export default function GuestDemo({ onSignUp }) {
                 />
 
                 <CutMatchSuggestions
-                  userRole={USER_ROLES.GUEST}
-                  hasAccess={hasAccess}
-                />
+                  selectedMoods={selectedMoods}
+                  mode="guest"
+                  />
 
                 <Button
                   className="w-full mt-4"
