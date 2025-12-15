@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import {
@@ -15,52 +15,35 @@ import CutMatchSuggestions from "./CutMatchSuggestions";
 import { USER_ROLES, hasAccess } from "../hooks/useUserRole";
 import { useSession } from "../hooks/useSession";
 
-/**
- * GuestDemo
- * ----------
- * Explicit guest-only experience.
- * No auth required.
- * No redirects unless trial expires.
- */
-export default function GuestDemo({ onSignUp = () => {} }) {
+export default function GuestDemo() {
   const navigate = useNavigate();
-  const { guestTrialEnd, setGuestSession } = useSession();
+  const session = useSession();
+
+  // 🔒 Guard: wait for session to hydrate
+  if (!session) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin h-6 w-6 border-2 border-purple-500 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  const { guestTrialEnd } = session;
 
   const [selectedMoods, setSelectedMoods] = useState([]);
   const [showDemo, setShowDemo] = useState(false);
 
-  /**
-   * IMPORTANT
-   * ----------
-   * Explicitly mark this route as a guest session.
-   * This prevents AppShell / route guards from spinning forever.
-   */
-  useEffect(() => {
-    setGuestSession(true);
-  }, [setGuestSession]);
-
-  /**
-   * Trial countdown (defensive)
-   */
   const daysLeft = guestTrialEnd
     ? Math.max(
         0,
         Math.ceil((guestTrialEnd - Date.now()) / (1000 * 60 * 60 * 24))
       )
-    : 0;
-
-  /**
-   * Trial expiration → upgrade flow
-   */
-  useEffect(() => {
-    if (daysLeft <= 0 && typeof onSignUp === "function") {
-      onSignUp();
-    }
-  }, [daysLeft, onSignUp]);
+    : 3; // fallback demo window
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100">
       <div className="max-w-md mx-auto px-4 py-8">
+        
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-5xl font-bold gradient-text mb-3">FACEUP</h1>
@@ -73,10 +56,9 @@ export default function GuestDemo({ onSignUp = () => {} }) {
               <User className="inline h-3 w-3 mr-1" />
               GUEST
             </span>
-
             <span className="px-3 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
               <Clock className="inline h-3 w-3 mr-1" />
-              {daysLeft} day{daysLeft !== 1 ? "s" : ""} left
+              {daysLeft} days left
             </span>
           </div>
         </div>
@@ -89,18 +71,16 @@ export default function GuestDemo({ onSignUp = () => {} }) {
               Free Trial Active
             </CardTitle>
           </CardHeader>
-
           <CardContent>
             <Alert>
               <AlertDescription>
-                Enjoy limited access during your free trial.  
-                Sign up to save looks and unlock full features.
+                Enjoy a limited demo. Sign up to save your looks.
               </AlertDescription>
             </Alert>
           </CardContent>
         </Card>
 
-        {/* Demo Actions */}
+        {/* Actions */}
         <Card>
           <CardHeader>
             <CardTitle>Try FaceUp</CardTitle>
@@ -110,10 +90,7 @@ export default function GuestDemo({ onSignUp = () => {} }) {
           </CardHeader>
 
           <CardContent className="space-y-4">
-            <Button
-              className="w-full"
-              onClick={() => setShowDemo(true)}
-            >
+            <Button onClick={() => setShowDemo(true)} className="w-full">
               <Camera className="h-4 w-4 mr-2" />
               Try Demo Scan
             </Button>
@@ -122,11 +99,11 @@ export default function GuestDemo({ onSignUp = () => {} }) {
               <>
                 <MoodSelector
                   selectedMoods={selectedMoods}
-                  onMoodToggle={(mood) =>
+                  onMoodToggle={(m) =>
                     setSelectedMoods((prev) =>
-                      prev.includes(mood)
-                        ? prev.filter((x) => x !== mood)
-                        : [...prev, mood]
+                      prev.includes(m)
+                        ? prev.filter((x) => x !== m)
+                        : [...prev, m]
                     )
                   }
                 />
