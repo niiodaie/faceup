@@ -1,10 +1,23 @@
-import React from 'react';
-import IntroPage from '../components/IntroPage';
+import { useNavigate } from "react-router-dom";
+import { useSession } from "../hooks/useSession";
 
-/**
- * LandingPage - Public landing page at root (/)
- * This is the main entry point for visitors
- */
-export default function LandingPage() {
-  return <IntroPage />;
+export default function IntroPage() {
+  const navigate = useNavigate();
+  const { enableGuestMode } = useSession();
+
+  return (
+    <>
+      {/* other UI */}
+
+      <button
+        onClick={() => {
+          enableGuestMode();   // 🔑 THIS WAS MISSING
+          navigate("/app");
+        }}
+        className="..."
+      >
+        Try Guest Demo
+      </button>
+    </>
+  );
 }
