@@ -13,20 +13,25 @@ import { Camera, Sparkles, User, Clock, Star } from "lucide-react";
 import MoodSelector from "./MoodSelector";
 import CutMatchSuggestions from "./CutMatchSuggestions";
 import { USER_ROLES, hasAccess } from "../hooks/useUserRole";
+import { useSession } from "../hooks/useSession";
 
 export default function GuestDemo() {
   const navigate = useNavigate();
+  const { guestTrialEnd } = useSession();
 
   const [selectedMoods, setSelectedMoods] = useState([]);
   const [showDemo, setShowDemo] = useState(false);
 
-  // Static guest messaging (NO session dependency)
-  const daysLeft = 3;
+  const daysLeft = guestTrialEnd
+    ? Math.max(
+        0,
+        Math.ceil((guestTrialEnd - Date.now()) / (1000 * 60 * 60 * 24))
+      )
+    : 7; // safe default
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100">
       <div className="max-w-md mx-auto px-4 py-8">
-        
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-5xl font-bold gradient-text mb-3">FACEUP</h1>
@@ -51,7 +56,7 @@ export default function GuestDemo() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-purple-600" />
-              Free Trial
+              Free Trial Active
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -64,33 +69,32 @@ export default function GuestDemo() {
           </CardContent>
         </Card>
 
-        {/* Actions */}
+        {/* Demo */}
         <Card>
           <CardHeader>
             <CardTitle>Try FaceUp</CardTitle>
             <CardDescription>
-              Explore styles without an account
+              Explore styles during your free trial
             </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-4">
-            <Button
-              onClick={() => setShowDemo(true)}
-              className="w-full"
-            >
-              <Camera className="h-4 w-4 mr-2" />
-              Try Demo Scan
-            </Button>
+            {!showDemo && (
+              <Button onClick={() => setShowDemo(true)} className="w-full">
+                <Camera className="h-4 w-4 mr-2" />
+                Try Demo Scan
+              </Button>
+            )}
 
             {showDemo && (
               <>
                 <MoodSelector
                   selectedMoods={selectedMoods}
-                  onMoodToggle={(m) =>
+                  onMoodToggle={(mood) =>
                     setSelectedMoods((prev) =>
-                      prev.includes(m)
-                        ? prev.filter((x) => x !== m)
-                        : [...prev, m]
+                      prev.includes(mood)
+                        ? prev.filter((m) => m !== mood)
+                        : [...prev, mood]
                     )
                   }
                 />
@@ -98,6 +102,7 @@ export default function GuestDemo() {
                 <CutMatchSuggestions
                   userRole={USER_ROLES.GUEST}
                   hasAccess={hasAccess}
+                  moods={selectedMoods}
                 />
 
                 <Button
