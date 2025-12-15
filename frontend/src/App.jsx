@@ -2,7 +2,7 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import "./App.css";
 
-// Providers
+// Provider (SINGLE INSTANCE)
 import { SessionProvider } from "./hooks/useSession.jsx";
 
 // Route Shells
@@ -15,103 +15,37 @@ import GuestDemo from "./components/GuestDemo";
 import NotFound from "./components/NotFound";
 
 /**
- * App – Routing & Auth Boundary Definition
+ * App – SINGLE auth boundary
  *
- * AUTH RULES:
- * 1. Guest routes NEVER touch Supabase / Session
- * 2. Auth routes ALWAYS have SessionProvider
- * 3. App routes ALWAYS have SessionProvider
+ * - SessionProvider is mounted ONCE
+ * - Guest logic is handled inside useSession
+ * - Routes stay clean
  */
 function App() {
   return (
-    <Routes>
-      {/* ───────────────────────────────────────────── */}
-      {/* Public Landing (NO SESSION) */}
-      {/* ───────────────────────────────────────────── */}
-      <Route path="/" element={<LandingPage />} />
+    <SessionProvider>
+      <Routes>
+        {/* Public Landing */}
+        <Route path="/" element={<LandingPage />} />
 
-      {/* ───────────────────────────────────────────── */}
-      {/* Guest Mode (NO SESSION, NO SUPABASE) */}
-      {/* ───────────────────────────────────────────── */}
-      <Route path="/app/guest" element={<GuestDemo />} />
+        {/* Guest Demo */}
+        <Route path="/app/guest" element={<GuestDemo />} />
 
-      {/* ───────────────────────────────────────────── */}
-      {/* Auth Routes (SESSION REQUIRED) */}
-      {/* ───────────────────────────────────────────── */}
-      <Route
-        path="/auth/*"
-        element={
-          <SessionProvider>
-            <AuthShell />
-          </SessionProvider>
-        }
-      />
+        {/* Auth */}
+        <Route path="/auth/*" element={<AuthShell />} />
+        <Route path="/login" element={<AuthShell />} />
+        <Route path="/signup" element={<AuthShell />} />
 
-      <Route
-        path="/login"
-        element={
-          <SessionProvider>
-            <AuthShell />
-          </SessionProvider>
-        }
-      />
+        {/* App */}
+        <Route path="/app/*" element={<AppShell />} />
+        <Route path="/dashboard" element={<AppShell />} />
+        <Route path="/pricing" element={<AppShell />} />
+        <Route path="/face-scan" element={<AppShell />} />
 
-      <Route
-        path="/signup"
-        element={
-          <SessionProvider>
-            <AuthShell />
-          </SessionProvider>
-        }
-      />
-
-      {/* ───────────────────────────────────────────── */}
-      {/* Main App (SESSION REQUIRED) */}
-      {/* ───────────────────────────────────────────── */}
-      <Route
-        path="/app/*"
-        element={
-          <SessionProvider>
-            <AppShell />
-          </SessionProvider>
-        }
-      />
-
-      {/* ───────────────────────────────────────────── */}
-      {/* Legacy Routes (SESSION REQUIRED) */}
-      {/* ───────────────────────────────────────────── */}
-      <Route
-        path="/dashboard"
-        element={
-          <SessionProvider>
-            <AppShell />
-          </SessionProvider>
-        }
-      />
-
-      <Route
-        path="/pricing"
-        element={
-          <SessionProvider>
-            <AppShell />
-          </SessionProvider>
-        }
-      />
-
-      <Route
-        path="/face-scan"
-        element={
-          <SessionProvider>
-            <AppShell />
-          </SessionProvider>
-        }
-      />
-
-      {/* ───────────────────────────────────────────── */}
-      {/* 404 */}
-      {/* ───────────────────────────────────────────── */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        {/* 404 */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </SessionProvider>
   );
 }
 
