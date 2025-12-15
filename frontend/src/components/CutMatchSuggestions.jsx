@@ -7,7 +7,25 @@ import BeautyAffiliateBlock from './BeautyAffiliateBlock';
 const CutMatchSuggestions = ({
   selectedMoods = [],
   entitlements,
+  mode = "auth", // "auth" | "guest"
 }) => {
+
+    /* ======================================
+     GUEST MODE FALLBACK ENTITLEMENTS
+     ====================================== */
+  if (mode === "guest") {
+    entitlements = {
+      plan: "guest",
+      isTrial: true,
+      showAds: true,
+      features: {
+        basicSuggestions: true,
+        advancedSuggestions: false,
+      },
+    };
+  }
+
+  
   /* ======================================
      SAFETY: ENTITLEMENTS NOT READY
      ====================================== */
