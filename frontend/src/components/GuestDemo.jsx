@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import {
@@ -15,9 +15,12 @@ import CutMatchSuggestions from "./CutMatchSuggestions";
 import { USER_ROLES, hasAccess } from "../hooks/useUserRole";
 import { useSession } from "../hooks/useSession";
 
-export default function GuestDemo() {
+export default function GuestDemo({ onSignUp }) {
   const navigate = useNavigate();
-  const { guestTrialEnd } = useSession();
+
+  // ✅ SAFE SESSION ACCESS
+  const session = useSession();
+  const guestTrialEnd = session?.guestTrialEnd ?? null;
 
   const [selectedMoods, setSelectedMoods] = useState([]);
   const [showDemo, setShowDemo] = useState(false);
@@ -27,11 +30,18 @@ export default function GuestDemo() {
         0,
         Math.ceil((guestTrialEnd - Date.now()) / (1000 * 60 * 60 * 24))
       )
-    : 7; // safe default
+    : 7; // ✅ default guest trial window
+
+  useEffect(() => {
+    if (guestTrialEnd && daysLeft <= 0 && typeof onSignUp === "function") {
+      onSignUp();
+    }
+  }, [daysLeft, guestTrialEnd, onSignUp]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100">
       <div className="max-w-md mx-auto px-4 py-8">
+        
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-5xl font-bold gradient-text mb-3">FACEUP</h1>
@@ -62,14 +72,14 @@ export default function GuestDemo() {
           <CardContent>
             <Alert>
               <AlertDescription>
-                You’re exploring FaceUp as a guest.  
-                Sign up anytime to save your looks.
+                Trial ends in {daysLeft} day{daysLeft !== 1 ? "s" : ""}.  
+                Sign up to save your looks.
               </AlertDescription>
             </Alert>
           </CardContent>
         </Card>
 
-        {/* Demo */}
+        {/* Actions */}
         <Card>
           <CardHeader>
             <CardTitle>Try FaceUp</CardTitle>
@@ -79,12 +89,10 @@ export default function GuestDemo() {
           </CardHeader>
 
           <CardContent className="space-y-4">
-            {!showDemo && (
-              <Button onClick={() => setShowDemo(true)} className="w-full">
-                <Camera className="h-4 w-4 mr-2" />
-                Try Demo Scan
-              </Button>
-            )}
+            <Button onClick={() => setShowDemo(true)} className="w-full">
+              <Camera className="h-4 w-4 mr-2" />
+              Try Demo Scan
+            </Button>
 
             {showDemo && (
               <>
@@ -93,7 +101,7 @@ export default function GuestDemo() {
                   onMoodToggle={(mood) =>
                     setSelectedMoods((prev) =>
                       prev.includes(mood)
-                        ? prev.filter((m) => m !== mood)
+                        ? prev.filter((x) => x !== mood)
                         : [...prev, mood]
                     )
                   }
@@ -102,7 +110,6 @@ export default function GuestDemo() {
                 <CutMatchSuggestions
                   userRole={USER_ROLES.GUEST}
                   hasAccess={hasAccess}
-                  moods={selectedMoods}
                 />
 
                 <Button
