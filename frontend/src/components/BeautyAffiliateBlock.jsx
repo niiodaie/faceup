@@ -16,19 +16,15 @@ const BeautyAffiliateBlock = ({
   // Pro users see NO ads
   if (entitlements?.plan === 'pro') return null;
 
-  // Defensive: always pass safe values
-  const safeMoods = Array.isArray(moods) ? moods : [];
-  const products = getProductsForContext(safeMoods, occasion) || [];
+  const products = getProductsForContext(moods, occasion);
 
-  if (!products.length) return null;
+  if (!Array.isArray(products) || products.length === 0) return null;
 
   return (
     <div className="bg-white rounded-2xl shadow p-6 mb-8">
       <div className="flex items-center gap-2 mb-4">
         <Sparkles className="h-5 w-5 text-pink-600" />
-        <h3 className="font-bold text-lg">
-          Recommended Beauty Picks
-        </h3>
+        <h3 className="font-bold text-lg">Recommended Beauty Picks</h3>
       </div>
 
       <p className="text-sm text-gray-600 mb-5">
